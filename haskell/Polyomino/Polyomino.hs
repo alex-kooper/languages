@@ -6,7 +6,6 @@ module Polyomino (
     move,
     rotateRight,
     rotateLeft,
-    rotate,
     normalize,
     fromList,
     belongsTo,
@@ -30,7 +29,13 @@ upperLeftCorner (Polyomino points) = Point x y
     where
         x = minimum $ map Point.x points
         y = minimum $ map Point.y points 
- 
+
+lowerRightCorner:: Polyomino -> Point
+lowerRightCorner (Polyomino points) = Point x y
+    where
+        x = maximum $ map Point.x points
+        y = maximum $ map Point.y points 
+  
 getDimensions :: Polyomino -> Dimensions
 getDimensions (Polyomino points) = Dimensions [x1..x2] [y1..y2] 
     where
@@ -48,8 +53,6 @@ rotateLeft point (Polyomino points) = Polyomino $ map (Point.rotateLeft point) p
 rotateRight :: Point -> Polyomino -> Polyomino
 rotateRight point (Polyomino points) = Polyomino $ map (Point.rotateRight point) points
 
-rotate p = normalize $ rotateRight (Point 0 0) p
-
 normalize :: Polyomino -> Polyomino
 normalize p = move (-x) (-y) p
     where Point x y = upperLeftCorner p
@@ -66,8 +69,9 @@ renderPoint point polyomino = if point `belongsTo` polyomino then "[]" else "  "
 
 renderLine :: [Int] -> Int -> Polyomino -> String
 renderLine xRange y polyomino = 
-    intercalate "" [renderPoint (Point x y) polyomino | x <- xRange]
+    concat [renderPoint (Point x y) polyomino | x <- xRange]
 
+renderRectangle :: [Int] -> [Int] -> Polyomino -> String
 renderRectangle xRange yRange polyomino = 
     intercalate "\n" [renderLine xRange y polyomino | y <- yRange] 
 
@@ -77,8 +81,19 @@ renderPolyomino p = "\n" ++ (renderRectangle (xRange d) (yRange d) polyomino) ++
        polyomino = normalize p
        d = getDimensions polyomino
 
+allRotations :: Polyomino -> [Polyomino]
+allRotations p = rotations' 3 [normalize p]
+    where
+        rotations' 0 xs = xs
+        rotations' n (x:xs) = rotations' (n - 1) ((rotate x):x:xs)
+        rotate = normalize . (rotateRight $ Point 0 0)
+
 instance Show Polyomino where
     show = renderPolyomino
+
+instance Eq Polyomino where
+    p1 == p2 = any equalToP1 $ allRotations p2
+        where equalToP1 p = points p == (points $ normalize p1)
 
 tetramino :: Polyomino
 tetramino = fromList [(1, 0), (2, 0), (3, 0), (3, 1)]
