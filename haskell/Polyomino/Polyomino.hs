@@ -7,17 +7,20 @@ module Polyomino (
     rotateRight,
     rotateLeft,
     normalize,
-    fromList,
+    Polyomino.fromList,
     belongsTo,
     renderPolyomino    
 ) where
 
-import Data.List
+import Prelude hiding (map)
+import qualified Prelude(map)
+import Data.List(intercalate)
+import Data.Set
 
 import Point(Point(..))
 import qualified Point
 
-data Polyomino = Polyomino { points :: [Point] } 
+data Polyomino = Polyomino { points :: Set Point } 
 
 data Dimensions = Dimensions { 
     xRange :: [Int], 
@@ -27,22 +30,22 @@ data Dimensions = Dimensions {
 upperLeftCorner :: Polyomino -> Point
 upperLeftCorner (Polyomino points) = Point x y
     where
-        x = minimum $ map Point.x points
-        y = minimum $ map Point.y points 
+        x = findMin $ map Point.x points
+        y = findMin $ map Point.y points 
 
 lowerRightCorner:: Polyomino -> Point
 lowerRightCorner (Polyomino points) = Point x y
     where
-        x = maximum $ map Point.x points
-        y = maximum $ map Point.y points 
+        x = findMax $ map Point.x points
+        y = findMax $ map Point.y points 
   
 getDimensions :: Polyomino -> Dimensions
 getDimensions (Polyomino points) = Dimensions [x1..x2] [y1..y2] 
     where
-        x1 = minimum $ map Point.x points
-        x2 = maximum $ map Point.x points
-        y1 = minimum $ map Point.y points 
-        y2 = maximum $ map Point.y points
+        x1 = findMin $ map Point.x points
+        x2 = findMax $ map Point.x points
+        y1 = findMin $ map Point.y points 
+        y2 = findMax $ map Point.y points
 
 move :: Int -> Int -> Polyomino -> Polyomino
 move dx dy (Polyomino points) = Polyomino $ map (Point.move dx dy) points
@@ -58,11 +61,11 @@ normalize p = move (-x) (-y) p
     where Point x y = upperLeftCorner p
  
 fromList :: [(Int, Int)] -> Polyomino
-fromList xs = Polyomino $ map toPoint xs 
+fromList xs = Polyomino $ Data.Set.fromList $ Prelude.map toPoint xs 
     where toPoint (x, y) = Point x y
 
 belongsTo :: Point -> Polyomino -> Bool
-point `belongsTo` (Polyomino points) = point `elem` points
+point `belongsTo` (Polyomino points) = point `member` points
 
 renderPoint :: Point -> Polyomino -> String
 renderPoint point polyomino = if point `belongsTo` polyomino then "[]" else "  "  
@@ -96,6 +99,6 @@ instance Eq Polyomino where
         where equalToP1 p = points p == (points $ normalize p1)
 
 tetramino :: Polyomino
-tetramino = fromList [(1, 0), (2, 0), (3, 0), (3, 1)]
+tetramino = Polyomino.fromList [(1, 0), (2, 0), (3, 0), (3, 1)]
 
 

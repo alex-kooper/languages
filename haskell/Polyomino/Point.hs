@@ -1,6 +1,6 @@
 module Point where
 
-data Point = Point { x :: Int, y :: Int } deriving (Show, Read, Eq)
+data Point = Point { x :: Int, y :: Int } deriving (Show, Read, Eq, Ord)
 
 move :: Int -> Int -> Point -> Point
 move dx dy (Point x y) = Point (x + dx) (y + dy)
