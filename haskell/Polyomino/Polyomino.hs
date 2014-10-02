@@ -9,6 +9,7 @@ module Polyomino (
     normalize,
     Polyomino.fromList,
     belongsTo,
+    add,
     renderPolyomino    
 ) where
 
@@ -66,6 +67,9 @@ fromList xs = Polyomino $ Data.Set.fromList $ Prelude.map toPoint xs
 
 belongsTo :: Point -> Polyomino -> Bool
 point `belongsTo` (Polyomino points) = point `member` points
+
+add :: Point -> Polyomino -> Polyomino
+add point (Polyomino points) = Polyomino $ insert point points
 
 renderPoint :: Point -> Polyomino -> String
 renderPoint point polyomino = if point `belongsTo` polyomino then "[]" else "  "  
