@@ -62,3 +62,4 @@ main = do
     putStrLn $ "Tree roots: " ++ (show $ findRoots tree)
     putStrLn $ "Trees minimum depth is: " ++ (show $ treeMinDepth tree)
 
+
