@@ -1,6 +1,6 @@
 package kooper.polyomino
 
-class Point(val x: Int, val y: Int) {
+case class Point(val x: Int, val y: Int) extends Equals {
   
   def move(dx: Int, dy: Int) = new Point(x + dx, y + dy)
   
@@ -15,6 +15,5 @@ class Point(val x: Int, val y: Int) {
      val newY = -(this.x - p.x) + p.y
      new Point(newX, newY);   
   }
-  
-  override def toString = "Point(" + this.x + ", " + this.y + ")"
 }
+
