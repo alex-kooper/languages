@@ -1,6 +1,6 @@
 package kooper.polyomino
 
-case class Polyomino(val points: List[Point]) {
+case class Polyomino(val points: Set[Point]) {
   
   def upperLeftCorner = {
     val x = points.map(_.x).min	

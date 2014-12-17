@@ -17,12 +17,7 @@ case class Point(val x: Int, val y: Int) extends Ordered[Point] {
   }
   
   override def compare(that: Point) = {
-    val compareX = this.x compare that.x
-    
-    if(compareX == 0) 
-      this.y compare that.y 
-    else 
-      compareX
+    Ordering[(Int, Int)].compare((this.x, this.y), (that.x, that.y))
   }
 }
 
