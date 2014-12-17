@@ -1,6 +1,8 @@
 package kooper.polyomino
 
-case class Polyomino(val points: Set[Point]) {
+import collection.immutable.SortedSet
+
+case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   
   def upperLeftCorner = {
     val x = points.map(_.x).min	
@@ -39,11 +41,30 @@ case class Polyomino(val points: Set[Point]) {
     
     a.map(_.mkString).mkString("\n", "\n", "\n")
   }
+  
+  override def compare(that: Polyomino) = {
+    import Ordering.Implicits._
+    Ordering[List[Point]].compare(this.points.toList, that.points.toList)
+  }
+  
+  def allRotations = {
+    var rotations = List(this)
+    var p = this
+    
+    for(i <- 1 to 3) {
+      p = p.rotateRight.normalize
+      rotations = p :: rotations
+    }
+    
+    rotations
+  }
+  
+  def canonicalize = this.allRotations.filter(p => p.width >= p.height).max
 }
 
 object Polyomino {
   def apply(xs: (Int, Int)*) = {
     val points = for((x,y) <-xs) yield Point(x, y)
-    new Polyomino(points.toSet)  
+    new Polyomino(points.to[SortedSet])  
   }
 }
