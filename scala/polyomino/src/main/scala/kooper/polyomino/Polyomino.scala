@@ -4,6 +4,10 @@ import collection.immutable.SortedSet
 
 case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   
+  def +(p: Point) = new Polyomino(points + p)
+  
+  def contains(p: Point) = points.contains(p) 
+  
   def upperLeftCorner = {
     val x = points.map(_.x).min	
     val y = points.map(_.y).min
@@ -27,13 +31,13 @@ case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   def rotateLeft(p: Point) = new Polyomino(points.map(_.rotateLeft(p)))
   def rotateLeft: Polyomino = this rotateLeft Point.origin
   
-  def normalize = {
+  def moveToOrigin = {
     val Point(x, y) = upperLeftCorner
     this.move(-x, -y)
   }
   
   override def toString = {
-    val n = this.normalize
+    val n = this.moveToOrigin
     
     var a = Array.tabulate(height, width)((y, x) => 
       if(n.points.contains(Point(x, y))) "[]" else "  "
@@ -52,14 +56,14 @@ case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
     var p = this
     
     for(i <- 1 to 3) {
-      p = p.rotateRight.normalize
+      p = p.rotateRight.moveToOrigin
       rotations = p :: rotations
     }
     
     rotations
   }
   
-  def canonicalize = this.allRotations.filter(p => p.width >= p.height).max
+  def normalize = this.allRotations.filter(p => p.width >= p.height).max
 }
 
 object Polyomino {
