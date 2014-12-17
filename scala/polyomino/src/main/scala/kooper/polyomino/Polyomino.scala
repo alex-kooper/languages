@@ -18,8 +18,12 @@ case class Polyomino(val points: Set[Point]) {
   def height = lowerRightCorner.y - upperLeftCorner.y + 1
   
   def move(dx: Int, dy: Int) = new Polyomino(points.map(_.move(dx, dy)))
+  
   def rotateRight(p: Point) = new Polyomino(points.map(_.rotateRight(p)))
+  def rotateRight: Polyomino = this rotateRight Point.origin
+  
   def rotateLeft(p: Point) = new Polyomino(points.map(_.rotateLeft(p)))
+  def rotateLeft: Polyomino = this rotateLeft Point.origin
   
   def normalize = {
     val Point(x, y) = upperLeftCorner

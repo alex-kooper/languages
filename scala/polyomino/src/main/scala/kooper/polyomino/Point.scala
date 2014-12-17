@@ -21,3 +21,7 @@ case class Point(val x: Int, val y: Int) extends Ordered[Point] {
   }
 }
 
+object Point {
+  val origin = Point(0, 0)
+}
+
