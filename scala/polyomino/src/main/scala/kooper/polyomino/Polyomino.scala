@@ -52,7 +52,7 @@ case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   }
   
   def allRotations = {
-    var rotations = List(this)
+    var rotations = List(this.moveToOrigin)
     var p = this
     
     for(i <- 1 to 3) {

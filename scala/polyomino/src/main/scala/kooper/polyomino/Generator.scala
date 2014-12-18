@@ -1,15 +1,17 @@
 package kooper.polyomino
 
+import scala.io.StdIn
+
 object Generator {
   
-  def generate(length: Int): Set[Polyomino] = {
-    if(length == 1) 
+  def generate(nBlocks: Int): Set[Polyomino] = {
+    if(nBlocks == 1) 
       Set(Polyomino((0, 0)))
     else    
-      generate(length - 1).map(generateAllOfPlusOneLength(_)).flatten
+      generate(nBlocks - 1).map(generateAllOfPlusOneBlock(_)).flatten
   }
   
-  private def generateByAddingPointsAround(polyomino: Polyomino, point: Point) = {
+  private def generateByAddingBlocksAround(polyomino: Polyomino, point: Point) = {
     val adjacentPointDeltas = Set((-1, 0), (0, -1), (1, 0), (0, 1))
     
     for {
@@ -19,17 +21,26 @@ object Generator {
     } yield (polyomino + newPoint).normalize
   }
   
-  private def generateAllOfPlusOneLength(polyomino: Polyomino) = {
-    var result:Set[Polyomino] = Set()
-    
-    for(p <- polyomino.points)
-      result = result ++ generateByAddingPointsAround(polyomino, p)
-    
-    result
+  private def generateAllOfPlusOneBlock(polyomino: Polyomino) = {
+    polyomino.points.toSet
+      .map((p: Point) => generateByAddingBlocksAround(polyomino, p))
+      .flatten
   }
 
   def main(args: Array[String]) {
-    println(generate(5))
+    print("Enter number of blocks: ")
+    val n = StdIn.readInt
+    
+    val polyominos = generate(n)
+    
+    println("\nThere are " + polyominos.size + " shapes " +
+            "that can be constructed out of " + n + " blocks")
+    
+    print("Do you want me to show them? [y/n]: ")
+    val yesOrNo = StdIn.readChar()
+    
+    if(yesOrNo.toLower == 'y')
+      polyominos.foreach(print)
   }
 }  
 
