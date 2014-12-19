@@ -11,7 +11,7 @@ object Generator {
       generate(nPoints - 1).flatMap(generateByAddingOnePoint(_))
   }
   
-  private def generateByAddingOnePoint(polyomino: Polyomino) = {
+  private def generateByAddingOnePoint(polyomino: Polyomino): Set[Polyomino] = {
     val adjacentPointDeltas = Set((-1, 0), (0, -1), (1, 0), (0, 1))
     
     for {
