@@ -2,7 +2,7 @@ package kooper.polyomino
 
 import collection.immutable.SortedSet
 
-case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
+class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   
   def +(p: Point) = new Polyomino(points + p)
   
@@ -36,21 +36,6 @@ case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
     this.move(-x, -y)
   }
   
-  override def toString = {
-    val n = this.moveToOrigin
-    
-    var a = Array.tabulate(height, width)((y, x) => 
-      if(n.points.contains(Point(x, y))) "[]" else "  "
-    )
-    
-    a.map(_.mkString).mkString("\n", "\n", "\n")
-  }
-  
-  override def compare(that: Polyomino) = {
-    import Ordering.Implicits._
-    Ordering[List[Point]].compare(this.points.toList, that.points.toList)
-  }
-  
   def allRotations = {
     var rotations = List(this.moveToOrigin)
     var p = this
@@ -64,6 +49,34 @@ case class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   }
   
   def normalize = this.allRotations.filter(p => p.width >= p.height).max
+  
+  def render = {
+    val p = this.moveToOrigin
+    
+    var matrix = Array.tabulate(height, width)(
+      (y, x) => 
+        if(p.points.contains(Point(x, y))) "[]" else "  "
+    )
+    
+    matrix.map(_.mkString).mkString("\n", "\n", "\n")
+  }
+  
+  override def toString = {
+    var Point(x, y) = upperLeftCorner
+    "Position: " + (x, y) + render + "\n"
+  }
+  
+  override def equals(other: Any) = other match {
+    case that: Polyomino => this.points == that.points
+    case _ => false
+  }
+  
+  override def hashCode = this.points.hashCode
+  
+  override def compare(that: Polyomino) = {
+    import Ordering.Implicits._
+    Ordering[List[Point]].compare(this.points.toList, that.points.toList)
+  }
 }
 
 object Polyomino {

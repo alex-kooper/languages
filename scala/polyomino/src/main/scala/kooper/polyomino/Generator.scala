@@ -35,7 +35,7 @@ object Generator {
     val yesOrNo = StdIn.readChar()
     
     if(yesOrNo.toLower == 'y')
-      polyominos.foreach(print)
+      polyominos.foreach(p => print(p.render))
   }
 }  
 
