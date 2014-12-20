@@ -11,10 +11,13 @@ case class Point(val x: Int, val y: Int) extends Ordered[Point] {
   } 
     
   def rotateLeft(p: Point) = {
-     val newX = (this.y - p.y) + p.x
-     val newY = -(this.x - p.x) + p.y
-     new Point(newX, newY);   
+    val newX = (this.y - p.y) + p.x
+    val newY = -(this.x - p.x) + p.y
+    new Point(newX, newY);   
   }
+  
+  def reflectVertically(x: Int) = new Point(2 * x - this.x, y)   
+  def reflectHorizontally(y: Int) = new Point(x, 2 * y - this.y)   
   
   override def compare(that: Point) = {
     Ordering[(Int, Int)].compare((this.x, this.y), (that.x, that.y))

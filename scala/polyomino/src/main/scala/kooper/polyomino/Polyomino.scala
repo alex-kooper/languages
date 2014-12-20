@@ -31,24 +31,32 @@ class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   def rotateLeft(p: Point) = new Polyomino(points.map(_.rotateLeft(p)))
   def rotateLeft: Polyomino = this rotateLeft Point.origin
   
+  def reflectVertically(x: Int) = new Polyomino(points.map(_.reflectVertically(x)))
+  def reflectOverTheYAxis = reflectVertically(0)
+
+  def reflectHorizontally(y: Int) = new Polyomino(points.map(_.reflectHorizontally(y)))
+  def reflectOverTheXAxis = reflectHorizontally(0)
+  
   def moveToOrigin = {
     val Point(x, y) = upperLeftCorner
     this.move(-x, -y)
   }
   
   def allRotations = {
-    var rotations = List(this.moveToOrigin)
+    var rotations = Set(this.moveToOrigin)
     var p = this
     
     for(i <- 1 to 3) {
       p = p.rotateRight.moveToOrigin
-      rotations = p :: rotations
+      rotations += p
     }
     
     rotations
   }
   
-  def normalize = this.allRotations.filter(p => p.width >= p.height).max
+  def allCongruents = allRotations ++ reflectOverTheXAxis.allRotations
+  
+  def normalize = this.allCongruents.filter(p => p.width >= p.height).max
   
   def render = {
     val p = this.moveToOrigin
@@ -67,9 +75,14 @@ class Polyomino(val points: SortedSet[Point]) extends Ordered[Polyomino] {
   }
   
   override def equals(other: Any) = other match {
-    case that: Polyomino => this.points == that.points
+    case that: Polyomino => 
+      (that canEqual this) &&
+      this.points == that.points
+    
     case _ => false
   }
+  
+  def canEqual(other: Any) = other.isInstanceOf[Polyomino]
   
   override def hashCode = this.points.hashCode
   

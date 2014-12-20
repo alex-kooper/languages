@@ -23,13 +23,13 @@ object Generator {
   }
   
   def main(args: Array[String]) {
-    print("Enter number of blocks: ")
+    print("Enter number of cells: ")
     val n = StdIn.readInt
     
     val polyominos = generate(n)
     
-    println("\nThere are " + polyominos.size + " shapes " +
-            "that can be constructed out of " + n + " blocks")
+    println("\nThere are " + polyominos.size + " free polyominoes with " + 
+            n + " cells.")
     
     print("Do you want me to show them? [y/n]: ")
     val yesOrNo = StdIn.readChar()
