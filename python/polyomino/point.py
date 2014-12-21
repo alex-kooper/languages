@@ -36,4 +36,5 @@ class Point(object):
     def __repr__(self):
         return "Point(" + str(self.x) + ", " + str(self.y) + ")"
 
+Point.origin = Point(0, 0) 
 

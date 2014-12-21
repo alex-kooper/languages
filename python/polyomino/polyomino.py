@@ -33,10 +33,10 @@ class Polyomino(object):
     def move(self, dx, dy):
         return Polyomino(p.move(dx, dy) for p in self.points)
 
-    def rotate_right(self, point):
+    def rotate_right(self, point=Point.origin):
         return Polyomino(p.rotate_right(point) for p in self.points) 
 
-    def rotate_left(self, point):
+    def rotate_left(self, point=Point.origin):
         return Polyomino(p.rotate_left(point) for p in self.points) 
 
     def move_to_origin(self):
