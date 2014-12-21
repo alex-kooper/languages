@@ -1,5 +1,6 @@
 
 class Point(object):
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -17,10 +18,10 @@ class Point(object):
         new_y = -(self.x - p.x) + p.y
         return Point(new_x, new_y)
 
-    def reflect_vertically(self, x):
+    def reflect_vertically(self, x=0):
         return Point(2 * x - self.x, self.y)
 
-    def reflect_horizontally(self, y):
+    def reflect_horizontally(self, y=0):
         return Point(self.x, 2 * y - self.y)
 
     def __hash__(self):
@@ -34,4 +35,5 @@ class Point(object):
 
     def __repr__(self):
         return "Point(" + str(self.x) + ", " + str(self.y) + ")"
+
 
