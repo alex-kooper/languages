@@ -3,13 +3,13 @@ from point import Point
 class Polyomino(object):
 
     def __init__(self, *args):
-        if(len(args)) > 1:
+        if len(args) > 1 or isinstance(args[0], tuple):
             self.points = frozenset(Point(x, y) for (x, y) in args)
         else:
             self.points = frozenset(args[0])
 
     def add(self, point):
-        self.points |= {point}
+        return Polyomino(self.points | {point})
 
     def __contains__(self, point):
         return point in self.points
@@ -61,6 +61,22 @@ class Polyomino(object):
         )
 
         return "\n" + s + "\n" 
+
+    def all_rotations(self):
+        polyomino = self.move_to_origin()
+        rotations = {polyomino}
+
+        for i in xrange(3):
+            polyomino = polyomino.rotate_right().move_to_origin() 
+	    rotations.add(polyomino)
+
+        return rotations
+
+    def all_congruents(self):
+        return self.all_rotations() | self.reflect_horizontally().all_rotations()
+
+    def normalize(self):
+        return max(p for p in self.all_congruents() if p.width() >= p.height())
 
     def __hash__(self):
         return hash(self.points)
