@@ -38,11 +38,42 @@ class Polyomino(object):
 
     def rotate_left(self, point=Point.origin):
         return Polyomino(p.rotate_left(point) for p in self.points) 
+    
+    def reflect_vertically(self, x=0):
+        return Polyomino(p.reflect_vertically(x) for p in self.points)
+
+    def reflect_horizontally(self, y=0):
+        return Polyomino(p.reflect_horizontally(y) for p in self.points)
 
     def move_to_origin(self):
         ulc = self.upper_left_corner()
         return self.move(-ulc.x, -ulc.y) 
 
+    def render(self):
+        polyomino = self.move_to_origin()
+
+        def render_cell(x, y): 
+            return "[]" if Point(x, y) in polyomino.points else "  "
+
+        s = "\n".join(
+            "".join(render_cell(x, y) for x in range(self.width()))
+            for y in range(self.height())
+        )
+
+        return "\n" + s + "\n" 
+
+    def __hash__(self):
+        return hash(self.points)
+
+    def __eq__(self, other):
+        return self.points == other.points 
+
+    def __cmp__(self, other):
+        return cmp(sorted(self.points), sorted(other.points))
+
     def __repr__(self):
         return "Polyomino(" + str(list(self.points)) + ")" 
+
+    def __str__(self):
+        return self.render()
 
