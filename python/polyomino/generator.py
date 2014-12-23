@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from polyomino import Polyomino
 
 def generate(n_points):
@@ -18,4 +20,23 @@ def generate_by_adding_one_point(polyomino):
                 polyominoes.add(polyomino.add(new_point).normalize())
 
     return polyominoes
+
+def main():
+    print('Enter number of cells: ', end='')
+    n = int(raw_input())
+    
+    polyominoes = generate(n)
+    
+    print('There are {0} polyominoes with  {1} cells'
+        .format(len(polyominoes), n))
+
+    print('Do you want me to show all of them? [y/n]: ', end='')
+    yesOrNo = raw_input()
+
+    if yesOrNo.lower() == 'y':
+        for p in polyominoes:
+            print(p.render())
+
+if __name__ == "__main__":
+    main()    
 
