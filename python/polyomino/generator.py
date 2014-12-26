@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 from polyomino import Polyomino
 
 def generate(n_points):
@@ -27,10 +26,10 @@ def main():
     
     polyominoes = generate(n)
     
-    print('There are {0} polyominoes with  {1} cells'
+    print('There are {0} polyominoes with {1} cells'
         .format(len(polyominoes), n))
 
-    print('Do you want me to show all of them? [y/n]: ', end='')
+    print('Would you like to see all of them? [y/n]: ', end='')
     yesOrNo = raw_input()
 
     if yesOrNo.lower() == 'y':
