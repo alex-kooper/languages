@@ -28,10 +28,10 @@ object Generator {
     
     val polyominos = generate(n)
     
-    println("\nThere are " + polyominos.size + " free polyominoes with " + 
+    println("There are " + polyominos.size + " free polyominoes with " + 
             n + " cells.")
     
-    print("Do you want me to show them? [y/n]: ")
+    print("Would you like to see all of them? [y/n]: ")
     val yesOrNo = StdIn.readChar()
     
     if(yesOrNo.toLower == 'y')
