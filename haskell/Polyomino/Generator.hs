@@ -7,7 +7,7 @@ import qualified Point
 adjacentPointDeltas = [(-1, 0), (0, -1), (1, 0), (0, 1)]
 
 generateBasedOnPoint :: Polyomino -> Point.Point -> [Polyomino]
-generateBasedOnPoint polyomino point = [add newPoint polyomino | 
+generateBasedOnPoint polyomino point = [normalize $ add newPoint polyomino | 
                                         (dx, dy) <- adjacentPointDeltas, 
                                         let newPoint = Point.move dx dy point,
                                         not (newPoint `belongsTo` polyomino)]
