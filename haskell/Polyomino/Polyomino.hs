@@ -84,22 +84,23 @@ renderPolyomino p = "\n" ++ (renderRectangle [x1..x2] [y1..y2] polyomino) ++ "\n
        Point x1 y1 = upperLeftCorner polyomino 
        Point x2 y2 = lowerRightCorner polyomino
 
-allRotations :: Polyomino -> [Polyomino]
-allRotations p = rotations 3 [moveToOrigin p]
+allRotations :: Polyomino -> Set Polyomino
+allRotations p = rotations 3 p (singleton $ moveToOrigin p)
     where
-        rotations 0 xs = xs
-        rotations n (x:xs) = rotations (n - 1) ((rotate x):x:xs)
+        rotations 0 p xs = xs
+
+        rotations n p xs = rotations (n - 1) newP (insert newP xs)
+            where newP = rotate p
+
         rotate = moveToOrigin . (rotateRight $ Point 0 0)
 
 normalize :: Polyomino -> Polyomino
-normalize = maximum . allRotations
+normalize = findMax . Data.Set.filter isWide . allRotations
+    where
+        isWide p = width p >= height p
 
 instance Show Polyomino where
     show = renderPolyomino
-
--- instance Eq Polyomino where
---    p1 == p2 = any equalToP1 $ allRotations p2
---        where equalToP1 p = points p == (points $ moveToOrigin p1)
 
 tetramino :: Polyomino
 tetramino = Polyomino.fromList [(1, 0), (2, 0), (3, 0), (3, 1)]

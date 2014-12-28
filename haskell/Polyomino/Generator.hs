@@ -1,22 +1,25 @@
+import Data.Set hiding (map, fromList)
 import qualified Data.Set as Set
-import Data.List
 
-import Polyomino
+import Polyomino hiding (fromList)
+import qualified Polyomino
 import qualified Point
 
-generateByAddingOnePoint :: Polyomino -> [Polyomino]
-generateByAddingOnePoint polyomino = [normalize $ add newPoint polyomino |
-                                      p <- Set.toList $ points polyomino,
-                                      (dx, dy) <- adjacentPointDeltas, 
-                                      let newPoint = Point.move dx dy p,
-                                      not (newPoint `belongsTo` polyomino)]
+generateByAddingOnePoint :: Polyomino -> Set Polyomino
+generateByAddingOnePoint polyomino = 
+    Set.fromList
+        [normalize $ add newPoint polyomino |
+        p <- toList $ points polyomino,
+        (dx, dy) <- adjacentPointDeltas, 
+        let newPoint = Point.move dx dy p,
+        not (newPoint `belongsTo` polyomino)]
     where
         adjacentPointDeltas = [(-1, 0), (0, -1), (1, 0), (0, 1)]
 
-generatePolyominos :: Int -> [Polyomino]
+generate:: Int -> Set Polyomino
 
-generatePolyominos 1 = [fromList [(0, 0)]]
+generate 1 = singleton $ Polyomino.fromList [(0, 0)]
 
-generatePolyominos n = 
-    nub $ concat [generateByAddingOnePoint p | p <- generatePolyominos (n - 1)]
+generate n = 
+    unions $ map generateByAddingOnePoint (toList $ generate (n - 1))
 
