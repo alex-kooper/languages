@@ -17,4 +17,9 @@ rotateLeft (Point x1 y1) (Point x2 y2) = Point newX newY
         newX = (y2 - y1) + x1
         newY = -(x2 - x1) + y1
 
+reflectVertically :: Int -> Point -> Point
+reflectVertically rx (Point x y) = Point (2 * rx - x) y
+
+reflectHorizontally :: Int -> Point -> Point
+reflectHorizontally ry (Point x y) = Point x (2 * ry - y)
 

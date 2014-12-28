@@ -9,6 +9,10 @@ module Polyomino (
     move,
     rotateRight,
     rotateLeft,
+    reflectVertically,
+    reflectOverTheYAxis,
+    reflectHorizontally,
+    reflectOverTheXAxis,
     moveToOrigin,
     Polyomino.fromList,
     renderPolyomino,
@@ -58,6 +62,14 @@ rotateLeft point (Polyomino points) = Polyomino $ map (Point.rotateLeft point) p
 rotateRight :: Point -> Polyomino -> Polyomino
 rotateRight point (Polyomino points) = Polyomino $ map (Point.rotateRight point) points
 
+reflectVertically :: Int -> Polyomino -> Polyomino
+reflectVertically x (Polyomino points) = Polyomino $ map (Point.reflectVertically x) points
+reflectOverTheYAxis p = reflectVertically 0 p
+
+reflectHorizontally :: Int -> Polyomino -> Polyomino
+reflectHorizontally y (Polyomino points) = Polyomino $ map (Point.reflectHorizontally y) points
+reflectOverTheXAxis p = reflectHorizontally 0 p
+
 moveToOrigin :: Polyomino -> Polyomino
 moveToOrigin p = move (-x) (-y) p
     where Point x y = upperLeftCorner p
@@ -94,8 +106,12 @@ allRotations p = rotations 3 p (singleton $ moveToOrigin p)
 
         rotate = moveToOrigin . (rotateRight $ Point 0 0)
 
+allRigidTransformations :: Polyomino -> Set Polyomino
+allRigidTransformations p = 
+    (allRotations p) `union` (allRotations $ reflectOverTheXAxis p)
+
 normalize :: Polyomino -> Polyomino
-normalize = findMax . Data.Set.filter isWide . allRotations
+normalize = findMax . Data.Set.filter isWide . allRigidTransformations
     where
         isWide p = width p >= height p
 

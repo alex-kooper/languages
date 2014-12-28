@@ -9,10 +9,10 @@ generateByAddingOnePoint :: Polyomino -> Set Polyomino
 generateByAddingOnePoint polyomino = 
     Set.fromList
         [normalize $ add newPoint polyomino |
-        p <- toList $ points polyomino,
-        (dx, dy) <- adjacentPointDeltas, 
-        let newPoint = Point.move dx dy p,
-        not (newPoint `belongsTo` polyomino)]
+            p <- toList $ points polyomino,
+            (dx, dy) <- adjacentPointDeltas, 
+            let newPoint = Point.move dx dy p,
+            not (newPoint `belongsTo` polyomino)]
     where
         adjacentPointDeltas = [(-1, 0), (0, -1), (1, 0), (0, 1)]
 
