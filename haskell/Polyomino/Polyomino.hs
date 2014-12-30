@@ -21,8 +21,10 @@ module Polyomino (
 
 import Prelude hiding (map)
 import qualified Prelude(map)
+
 import Data.List(intercalate)
 import Data.Set
+import qualified Data.Set as Set
 
 import Point(Point(..))
 import qualified Point
@@ -111,7 +113,7 @@ allRigidTransformations p =
     (allRotations p) `union` (allRotations $ reflectOverTheXAxis p)
 
 normalize :: Polyomino -> Polyomino
-normalize = findMax . Data.Set.filter isWide . allRigidTransformations
+normalize = findMax . Set.filter isWide . allRigidTransformations
     where
         isWide p = width p >= height p
 
