@@ -72,11 +72,11 @@ class Polyomino(object):
 
         return rotations
 
-    def all_congruents(self):
+    def all_rigid_transformations(self):
         return self.all_rotations() | self.reflect_horizontally().all_rotations()
 
     def normalize(self):
-        return max(p for p in self.all_congruents() if p.width() >= p.height())
+        return max(p for p in self.all_rigid_transformations() if p.width() >= p.height())
 
     def __hash__(self):
         return hash(self.points)
