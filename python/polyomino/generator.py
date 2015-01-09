@@ -1,12 +1,16 @@
 from __future__ import print_function
+from itertools import chain
+
 from polyomino import Polyomino
 
 def generate(n_points):
     if n_points == 1:
         return { Polyomino((0, 0)) }
+    
+    polyominoes = (generate_by_adding_one_point(p) 
+                   for p in generate(n_points - 1))
 
-    return { p2 for p1 in generate(n_points - 1) 
-                for p2 in generate_by_adding_one_point(p1) }
+    return set(chain.from_iterable(polyominoes))
     
 def generate_by_adding_one_point(polyomino):
     adjacent_point_deltas = ((-1, 0), (0, -1), (1, 0), (0, 1))
