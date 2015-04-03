@@ -34,7 +34,6 @@ def main():
     tk = Tk()
     pw = PolyominoWidget(tk, p)
     tk.mainloop()
-
+    
 if __name__ == '__main__':
     main()  
-  
