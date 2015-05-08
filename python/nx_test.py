@@ -1,10 +1,4 @@
 '''
-Id:          "$Id$"
-Copyright:   Copyright (c) 2015 Bank of America Merrill Lynch, All Rights Reserved
-Description:
-Test:
-'''
-
 import networkx
 from qz.lib.timeit import Timer
 
