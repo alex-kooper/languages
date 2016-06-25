@@ -91,5 +91,5 @@ def solve(height, width):
     return None
 
 
-print(solve(8, 8))
+print(solve(5, 50))
 
