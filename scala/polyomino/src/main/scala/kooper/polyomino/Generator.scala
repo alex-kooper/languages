@@ -8,7 +8,7 @@ object Generator {
     if(nPoints == 1) 
       Set(Polyomino((0, 0)))
     else    
-      generate(nPoints - 1).flatMap(generateByAddingOnePoint(_))
+      generate(nPoints - 1).par.flatMap(generateByAddingOnePoint(_)).seq
   }
   
   private def generateByAddingOnePoint(polyomino: Polyomino): Set[Polyomino] = {
