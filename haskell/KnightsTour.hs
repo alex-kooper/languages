@@ -3,6 +3,8 @@ import Data.List
 import Data.Maybe
 import Text.Printf
 import System.IO
+import Data.Function
+import System.Environment
 
 type Square = (Int, Int)
 type SquareValue = Int
@@ -58,10 +60,11 @@ renderBoard board =
         r <- (reverse [1..(height board)])
     ] 
     where renderSquare square = 
-              let s = Map.lookup square (squares board) 
+              let longestNumber = length $ show $ width board * height board
+                  s = Map.lookup square (squares board) 
               in case s of 
-                  (Just n) -> printf "%3d" n 
-                  (Nothing) -> printf "%3s" "*"
+                  (Just n) -> printf ("%" ++ (show $ longestNumber + 1) ++ "d") n 
+                  (Nothing) -> replicate 2 ' ' ++ "*" 
 
 instance Show Board where
     show = renderBoard
@@ -81,7 +84,9 @@ solveStartingFrom board
     | otherwise =
         let square = fromJust $ lastMove board 
             squares = movesOnBoardFrom board square
-            boards = map (makeMoveTo board) squares 
+            nMoves = length . movesOnBoardFrom board
+            squares' = sortBy (compare `on` nMoves) squares
+            boards = map (makeMoveTo board) squares'
             candidates = map solveStartingFrom boards
         in fromJust <$> find isJust candidates 
 
@@ -93,5 +98,9 @@ solve n m =
     in fromJust <$> find isJust candidates
 
 main = do 
-    print $ fromJust $ solve 7 7
+    [n, m] <- map (read :: String -> Int) <$> getArgs
+    let solution = solve n m
+    case solution of
+        (Just board) -> print board
+        Nothing -> putStrLn "No solution!"
 
