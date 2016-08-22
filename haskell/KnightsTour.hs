@@ -1,9 +1,9 @@
-import qualified Data.Map as Map
 import Data.List
 import Data.Maybe
+import Data.Function
+import qualified Data.Map as Map
 import Text.Printf
 import System.IO
-import Data.Function
 import System.Environment
 
 type Square = (Int, Int)
