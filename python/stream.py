@@ -1,3 +1,4 @@
+from operator import add
 
 class Stream(object):
     def __rpow__(self, other):
@@ -11,6 +12,9 @@ class NilStream(Stream):
         return self
 
     def map(self, f):
+        return self
+
+    def zip_with(self, f, other):
         return self
 
 Nil = NilStream()
@@ -41,11 +45,29 @@ class Cons(Stream):
     def map(self, f):
         return f(self.head) ** lazy_fn(lambda: self.tail.map(f)) 
 
+    def zip_with(self, f, other):
+        if other is Nil:
+            return Nil
+
+        return f(self.head, other.head) ** lazy_fn(lambda: self.tail.zip_with(f, other.tail))
+
+    def __getitem__(self, n):
+        node = self
+
+        try:
+            for i in xrange(n): 
+                node = node.tail
+        except:
+            raise IndexError('list index out of range')
+
+        return node.head
+
+
     def to_list(self):
         result = []
         current = self
 
-        while current != Nil:
+        while current is not Nil:
             result.append(current.head)
             current = current.tail
 
@@ -64,9 +86,13 @@ class LazyFunction(Stream):
 
 lazy_fn = LazyFunction
 
+# Examples of using the lazy stream
+
 ones = 1 ** lazy_fn(lambda: ones)
 nums = 1 ** lazy_fn(lambda: nums.map(lambda x: x + 1))
 
 def start_from(n):
     return n ** lazy_fn(lambda: start_from(n + 1))
+
+fibs = 0 ** 1 ** lazy_fn(lambda: fibs.zip_with(add, fibs.tail))
 
