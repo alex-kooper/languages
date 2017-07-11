@@ -22,7 +22,7 @@ class Cons(Stream):
 
     @property
     def tail(self):
-        if isinstance(self._tail, Lazy):
+        if isinstance(self._tail, LazyFunction):
             self._tail = self._tail()
 
         return self._tail 
@@ -32,14 +32,14 @@ class Cons(Stream):
 
     def take(self, n):
         if n > 0:
-            return self.head ** lazy(lambda: self.tail.take(n - 1))
+            return self.head ** lazy_fn(lambda: self.tail.take(n - 1))
         elif n == 1:
             return self.head ** Nil
         else:
             return Nil
 
     def map(self, f):
-        return f(self.head) ** lazy(lambda: self.tail.map(f)) 
+        return f(self.head) ** lazy_fn(lambda: self.tail.map(f)) 
 
     def to_list(self):
         result = []
@@ -52,21 +52,21 @@ class Cons(Stream):
         return result
 
 
-class Lazy(Stream):
+class LazyFunction(Stream):
     def __init__(self, fn):
-        self.fn = fn
+        self.function = fn
 
     def __call__(self):
-        return self.fn()
+        return self.function()
 
     def __repr__(self):
         return '...'
 
-lazy = Lazy
+lazy_fn = LazyFunction
 
-ones = 1 ** lazy(lambda: ones)
-nums = 1 ** lazy(lambda: nums.map(lambda x: x + 1))
+ones = 1 ** lazy_fn(lambda: ones)
+nums = 1 ** lazy_fn(lambda: nums.map(lambda x: x + 1))
 
 def start_from(n):
-    return n ** lazy(lambda: start_from(n + 1))
+    return n ** lazy_fn(lambda: start_from(n + 1))
 
