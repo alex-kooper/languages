@@ -1,8 +1,10 @@
 from operator import add
 
+
 class Stream(object):
     def __rpow__(self, other):
         return Cons(other, self)
+
 
 class NilStream(Stream):
     def __repr__(self):
@@ -17,7 +19,9 @@ class NilStream(Stream):
     def zip_with(self, f, other):
         return self
 
+
 Nil = NilStream()
+
 
 class Cons(Stream):
     def __init__(self, head, tail):
@@ -62,7 +66,6 @@ class Cons(Stream):
 
         return node.head
 
-
     def to_list(self):
         result = []
         current = self
@@ -85,6 +88,7 @@ class LazyFunction(Stream):
         return '...'
 
 lazy_fn = LazyFunction
+
 
 # Examples of using the lazy stream
 
