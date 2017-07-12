@@ -95,8 +95,12 @@ lazy_fn = LazyFunction
 ones = 1 ** lazy_fn(lambda: ones)
 nums = 1 ** lazy_fn(lambda: nums.map(lambda x: x + 1))
 
-def start_from(n):
-    return n ** lazy_fn(lambda: start_from(n + 1))
+def nums_from(n):
+    return n ** lazy_fn(lambda: nums_from(n + 1))
 
 fibs = 0 ** 1 ** lazy_fn(lambda: fibs.zip_with(add, fibs.tail))
+
+def fibs_from(a, b):
+    return a ** lazy_fn(lambda: fibs_from(b, a + b))
+
 
