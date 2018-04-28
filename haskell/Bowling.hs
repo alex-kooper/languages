@@ -4,50 +4,59 @@
 -- It does not include validation yet but can work for partial games
 -- The tests should be converted to unit tests.
 
-module Bowling where
-
 import Data.Semigroup
-import Data.Maybe
 
-type Roll = Int
+type Score = Int
 
-data Frame = Frame Roll (Maybe Roll) deriving (Eq)
+data Frame
+  = Strike
+  | Spare Score
+  | Open Score Score
 
--- Empty frames are used to avoid special cases, when there is not
--- next rolls
-emptyFrame :: Frame
-emptyFrame = Frame 0 Nothing
+  -- can be used as a bonus, when the last roll
+  -- is a strike or a spare
+  | Incomplete Score
 
-rollsFromFrame :: Frame -> [Roll]
-rollsFromFrame (Frame t1 t2) = [t1] <> maybeToList t2
+  -- used to avoid edge cases when there is no next frames
+  | Empty
+  deriving (Eq)
 
-isStrike :: Frame -> Bool
-isStrike (Frame t1 _) = t1 == 10
+rollsFromFrame :: Frame -> [Score]
+rollsFromFrame Strike = [10]
+rollsFromFrame (Spare s) = [s, 10 - s]
+rollsFromFrame (Open s1 s2) = [s1, s2]
+rollsFromFrame (Incomplete s) = [s]
+rollsFromFrame Empty = [0] -- empty is treated like incomplete with 0 score
 
-isSpare :: Frame -> Bool
-isSpare (Frame t1 (Just t2)) = t1 + t2 == 10
-isSpare (Frame _ _) = False
+frameScore :: Frame -> Score -> Score -> Score
+frameScore Strike next1 next2 = 10 + next1 + next2
+frameScore (Spare _) next _ = 10 + next
+frameScore (Open s1 s2) _ _ = s1 + s2
+frameScore (Incomplete s) _ _ = s
+frameScore Empty _ _ = 0
 
 instance Show Frame where
-  show (Frame 10 Nothing) = "X"
-  show (Frame x Nothing) = show x
-  show (Frame x (Just y))
-    | x + y == 10 = show x <> "/"
-    | otherwise   = show x <> show y
+  show Strike = "X"
+  show (Spare s) = show s <> "/"
+  show (Open s1 s2) = show s1 <> show s2
+  show (Incomplete s) = show s
+  show Empty = "0"
+
+charToScore :: Char -> Score
+charToScore c = read [c] :: Score
 
 instance Read Frame where
-  readsPrec _ ['X']  = [(Frame 10 Nothing, [])]
-  readsPrec _ [char] = [(Frame (read [char] :: Int) Nothing, [])]
+  readsPrec _ ['X']  = [(Strike, [])]
+  readsPrec _ [c] = [(Incomplete $ charToScore c, [])]
 
-  readsPrec _ [char1, char2] =
-    let t1 = read [char1] :: Int
-        t2 = case char2 of
-          '/' -> 10 - t1
-          '-' -> 0
-          c   -> read [c] :: Int
-    in [(Frame t1 (Just t2), [])]
+  readsPrec _ [c1, c2] =
+    let frame = case c2 of
+          '/' -> Spare $ charToScore c1
+          '-' -> Open (charToScore c1) 0
+          _   -> Open (charToScore c1) (charToScore c2)
+    in [(frame, [])]
 
-  readsPrec _ _ = error "Cannot parse a frame"
+  readsPrec _ _ = []
 
 
 parseGame :: String -> [Frame]
@@ -56,22 +65,17 @@ parseGame = map read . words
 framesScore :: [Frame] -> Int
 framesScore xs =
   sum $ zipWith3
-    frameScore
+    frameScore'
     (take 10 xs)
-    (drop 1 xs <> [emptyFrame])
-    (drop 2 xs <> replicate 2 emptyFrame)
+    (drop 1 xs <> [Empty])
+    (drop 2 xs <> replicate 2 Empty)
   where
-    frameScore frame nextFrame1 nextFrame2 =
+    frameScore' frame nextFrame1 nextFrame2 =
       let [nextRoll1, nextRoll2] = rollsFrom2Frames nextFrame1 nextFrame2
-      in frameScore' frame nextRoll1 nextRoll2
+      in frameScore frame nextRoll1 nextRoll2
 
     rollsFrom2Frames frame1 frame2 =
       take 2 $ rollsFromFrame frame1 <> rollsFromFrame frame2
-
-    frameScore' frame @ (Frame roll1 roll2) nextRoll1 nextRoll2
-      | isStrike frame = 10 + nextRoll1 + nextRoll2
-      | isSpare  frame = 10 + nextRoll1
-      | otherwise      = roll1 + fromMaybe 0 roll2
 
 gameScore :: String -> Int
 gameScore = framesScore . parseGame
