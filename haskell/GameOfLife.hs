@@ -1,8 +1,9 @@
 module GameOfLife where
 
 import Data.Set
-import Data.List
 import qualified Data.Set as Set
+import Data.List
+import qualified Data.List as List
 import Control.Monad
 
 data Cell = Cell { cellX :: Int, cellY :: Int } deriving (Show, Read, Eq, Ord)
@@ -52,6 +53,15 @@ renderTextPicture grid = intercalate "\n" $ renderLine <$> rangeY grid
   where
     renderCell cell = if cell `isAliveIn` grid then '*' else '.'
     renderLine y = (\x -> renderCell $ Cell x y) <$> rangeX grid
+
+allNeighbours :: Cell -> [Cell]
+allNeighbours (Cell x y) = [Cell (x + dx) (y + dy) |
+                            dx <- [-1..1], dy <- [-1..1],
+                            dx /= 0, dy /= 0 ]
+
+countAliveNeighboursIn :: Cell -> Grid -> Int
+cell `countAliveNeighboursIn` grid =
+  length $ List.filter (`isAliveIn` grid) $ allNeighbours cell
 
 grid1 :: String
 grid1 =
