@@ -1,13 +1,11 @@
-module GameOfLife where
-
 import Data.Set
 import qualified Data.Set as Set
 import Data.List
 import qualified Data.List as List
 import Control.Monad
+import Control.Arrow
 
 data Cell = Cell { cellX :: Int, cellY :: Int } deriving (Show, Read, Eq, Ord)
-
 newtype Grid = Grid(Set Cell) deriving (Show)
 
 emptyGrid :: Grid
@@ -57,18 +55,45 @@ renderTextPicture grid = intercalate "\n" $ renderLine <$> rangeY grid
 allNeighbours :: Cell -> [Cell]
 allNeighbours (Cell x y) = [Cell (x + dx) (y + dy) |
                             dx <- [-1..1], dy <- [-1..1],
-                            dx /= 0, dy /= 0 ]
+                            dx /= 0 || dy /= 0 ]
 
 countAliveNeighboursIn :: Cell -> Grid -> Int
 cell `countAliveNeighboursIn` grid =
   length $ List.filter (`isAliveIn` grid) $ allNeighbours cell
 
-grid1 :: String
-grid1 =
-  "........\n\
-  \....*...\n\
-  \...**...\n\
-  \........\n"
+nextGeneration :: Grid -> Grid
+nextGeneration grid = emptyGrid `setAlive` aliveCells
+  where
+    aliveCells = do
+      x <- rangeX grid
+      y <- rangeY grid
+
+      let cell = Cell x y
+          aliveNeighbours = cell `countAliveNeighboursIn` grid
+
+      guard $ aliveNeighbours > 1
+      guard $ aliveNeighbours < 4
+      guard $ aliveNeighbours == 3 || cell `isAliveIn` grid
+
+      return cell
+
+generations :: Grid -> [Grid]
+generations = iterate nextGeneration
+
+picture1 :: String
+picture1 =
+  ".....\n\
+  \.....\n\
+  \.***.\n\
+  \.....\n\
+  \.....\n"
 
 main :: IO()
-main = putStrLn $ renderTextPicture $ parseTextPicture grid1
+main = do
+  let pipeline =
+        parseTextPicture >>>
+        generations >>>
+        List.take 7 >>>
+        fmap renderTextPicture
+
+  mapM_ putStrLn $ pipeline picture1
