@@ -5,6 +5,7 @@
 -- The tests should be converted to unit tests.
 
 import Data.Semigroup
+import Data.Maybe
 
 type Score = Int
 
@@ -42,25 +43,39 @@ instance Show Frame where
   show (Incomplete s) = show s
   show Empty = "0"
 
-charToScore :: Char -> Score
-charToScore c = read [c] :: Score
+type ErrorOr a = Either String a
+
+charToScore :: Char -> String -> ErrorOr Score
+charToScore char frameString =
+  let score = fst <$> listToMaybe (reads [char] :: [(Score, String)])
+  
+  in case score of
+    Nothing -> Left $ "Cannot parse a frame: " <> frameString <>
+                      ". Unexpected character: " <> [char]
+
+    Just s -> Right s
+
+parseFrame :: String -> ErrorOr Frame
+parseFrame ['X'] = return Strike
+parseFrame [c] = Incomplete <$> charToScore c [c]
+
+parseFrame f @ [c1, c2] =
+  let score1 = charToScore c1 f
+      score2 = charToScore c2 f
+  in case c2 of
+    '/' -> Spare <$> score1
+    '-' -> Open <$> score1 <*> pure 0
+    _   -> Open <$> score1 <*> score2
+
+parseFrame s = Left $ "Cannot parse a frame: " <> s
 
 instance Read Frame where
-  readsPrec _ ['X']  = [(Strike, [])]
-  readsPrec _ [c] = [(Incomplete $ charToScore c, [])]
+  readsPrec _ s = case parseFrame s of
+    Left _ -> []
+    Right f  -> [(f, [])]
 
-  readsPrec _ [c1, c2] =
-    let frame = case c2 of
-          '/' -> Spare $ charToScore c1
-          '-' -> Open (charToScore c1) 0
-          _   -> Open (charToScore c1) (charToScore c2)
-    in [(frame, [])]
-
-  readsPrec _ _ = []
-
-
-parseGame :: String -> [Frame]
-parseGame = map read . words
+parseGame :: String -> ErrorOr [Frame]
+parseGame = traverse parseFrame . words
 
 framesScore :: [Frame] -> Int
 framesScore xs =
@@ -77,8 +92,8 @@ framesScore xs =
     rollsFrom2Frames frame1 frame2 =
       take 2 $ rollsFromFrame frame1 <> rollsFromFrame frame2
 
-gameScore :: String -> Int
-gameScore = framesScore . parseGame
+gameScore :: String -> ErrorOr Int
+gameScore s = framesScore <$> parseGame s
 
 -- Testing different cases
 
