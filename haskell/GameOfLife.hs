@@ -1,7 +1,6 @@
-import Data.Set
+import Data.Set hiding (filter)
 import qualified Data.Set as Set
-import Data.List
-import qualified Data.List as List
+import Data.List(intercalate)
 import Control.Monad
 import Control.Arrow
 
@@ -16,7 +15,7 @@ cell `isAliveIn` (Grid cells) = cell `member` cells
 
 setAlive :: Grid -> [Cell] -> Grid
 setAlive (Grid cells) cellsToSet =
-  Grid $ cells `Set.union` Set.fromList cellsToSet
+  Grid $ cells `union` Set.fromList cellsToSet
 
 setDead :: Grid -> [Cell] -> Grid
 setDead (Grid cells) cellsToSet =
@@ -59,7 +58,7 @@ allNeighbours (Cell x y) = [Cell (x + dx) (y + dy) |
 
 countAliveNeighboursIn :: Cell -> Grid -> Int
 cell `countAliveNeighboursIn` grid =
-  length $ List.filter (`isAliveIn` grid) $ allNeighbours cell
+  length $ filter (`isAliveIn` grid) $ allNeighbours cell
 
 nextGeneration :: Grid -> Grid
 nextGeneration grid = emptyGrid `setAlive` aliveCells
@@ -93,7 +92,7 @@ main = do
   let pipeline =
         parseTextPicture >>>
         generations >>>
-        List.take 7 >>>
+        take 7 >>>
         fmap renderTextPicture
 
   mapM_ putStrLn $ pipeline picture1
