@@ -3,6 +3,7 @@
 
 -- It does not include validation yet but can work for partial games
 -- The tests should be converted to unit tests.
+module Main where
 
 import Data.Semigroup
 import Data.Maybe
@@ -48,10 +49,10 @@ type ErrorOr a = Either String a
 charToScore :: Char -> String -> ErrorOr Score
 charToScore char frameString =
   let score = fst <$> listToMaybe (reads [char] :: [(Score, String)])
-  
+
   in case score of
-    Nothing -> Left $ "Cannot parse a frame: " <> frameString <>
-                      ". Unexpected character: " <> [char]
+    Nothing -> Left $ "Cannot parse a frame: '" <> frameString <> "'. " <>
+                      "Expecting a digit instead of: '" <> [char] <> "'."
 
     Just s -> Right s
 
