@@ -3,10 +3,12 @@
 
 -- It does not include validation yet but can work for partial games
 -- The tests should be converted to unit tests.
+
 module Main where
 
 import Data.Semigroup
 import Data.Maybe
+import Control.Monad
 
 type Score = Int
 
@@ -46,6 +48,7 @@ instance Show Frame where
 
 type ErrorOr a = Either String a
 
+-- Here frameString is necessary only to put it in the error message.
 charToScore :: Char -> String -> ErrorOr Score
 charToScore char frameString =
   let score = fst <$> listToMaybe (reads [char] :: [(Score, String)])
@@ -75,8 +78,30 @@ instance Read Frame where
     Left _ -> []
     Right f  -> [(f, [])]
 
+validateFrames :: [Frame] -> ErrorOr ()
+validateFrames frames = do
+  let nFrames = length frames
+
+  when (nFrames > 12) $ Left "It cannot be more than 12 frames"
+
+  when (nFrames == 12 && not (isStrike (frames !! 9)))
+    $ Left "It can only be 12 frames when the 10th frame is a strike."
+
+  when (nFrames == 11 && not (isStrike (frames !! 9)) && not (isSpare (frames !! 9)))
+    $ Left "It can only be 11 frames when the 10th frame is a strike or a spare."
+
+  where
+    isStrike Strike = True
+    isStrike _ = False
+
+    isSpare (Spare _) = True
+    isSpare _ = False
+
 parseGame :: String -> ErrorOr [Frame]
-parseGame = traverse parseFrame . words
+parseGame s = do
+  frames <- traverse parseFrame $ words s
+  validateFrames frames
+  return frames
 
 framesScore :: [Frame] -> Int
 framesScore xs =
@@ -94,7 +119,7 @@ framesScore xs =
       take 2 $ rollsFromFrame frame1 <> rollsFromFrame frame2
 
 gameScore :: String -> ErrorOr Int
-gameScore s = framesScore <$> parseGame s
+gameScore = fmap framesScore . parseGame
 
 -- Testing different cases
 
