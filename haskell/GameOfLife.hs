@@ -1,55 +1,65 @@
-import Data.Set hiding (filter)
+import Data.Set hiding (filter, take)
 import qualified Data.Set as Set
 import Data.List(intercalate)
+
 import Control.Monad
 import Control.Arrow
 
 data Cell = Cell { cellX :: Int, cellY :: Int } deriving (Show, Read, Eq, Ord)
-newtype Grid = Grid(Set Cell) deriving (Show)
 
-emptyGrid :: Grid
-emptyGrid = Grid Set.empty
+data Grid = Grid
+  { width :: Int
+  , height :: Int
+  , aliveCells :: Set Cell }
+  deriving (Show)
+
+mkEmptyGrid :: Int -> Int -> Grid
+mkEmptyGrid w h = Grid w h Set.empty
+
+fitIntoGrid :: Cell -> Grid -> Cell
+(Cell x y) `fitIntoGrid` (Grid w h _) = Cell (x `mod` w) (y `mod` h)
 
 isAliveIn :: Cell -> Grid -> Bool
-cell `isAliveIn` (Grid cells) = cell `member` cells
+cell `isAliveIn` grid = c `member` aliveCells grid
+  where
+    c = cell `fitIntoGrid` grid
 
 setAlive :: Grid -> [Cell] -> Grid
-setAlive (Grid cells) cellsToSet =
-  Grid $ cells `union` Set.fromList cellsToSet
+setAlive grid @ (Grid w h cells) cellsToSet = Grid w h $
+  cells `union` Set.fromList cellsToSet'
+  where
+    cellsToSet' = (`fitIntoGrid` grid) <$> cellsToSet
 
 setDead :: Grid -> [Cell] -> Grid
-setDead (Grid cells) cellsToSet =
-  Grid $ cells `difference` Set.fromList cellsToSet
-
-range :: Grid -> (Cell -> Int) -> [Int]
-range (Grid cells) fn
-  | Set.null cells = []
-  | otherwise       = [minValue .. maxValue]
+setDead grid @ (Grid w h cells) cellsToSet = Grid w h $
+  cells `difference` Set.fromList cellsToSet'
   where
-    s = Set.map fn cells
-    minValue = findMin s - 1
-    maxValue = findMax s + 1
+    cellsToSet' = (`fitIntoGrid` grid) <$> cellsToSet
 
-rangeX :: Grid -> [Int]
-rangeX grid = grid `range` cellX
+rangeOfX :: Grid -> [Int]
+rangeOfX grid = [0 .. width grid - 1]
 
-rangeY :: Grid -> [Int]
-rangeY grid = grid `range` cellY
+rangeOfY :: Grid -> [Int]
+rangeOfY grid = [0 .. height grid - 1]
 
 parseTextPicture :: String -> Grid
-parseTextPicture picture = emptyGrid `setAlive` aliveCells
+parseTextPicture picture = mkEmptyGrid width' height' `setAlive` aliveCells'
   where
-    aliveCells = do
-      (y, line) <- zip [0..] $ lines picture
+    lines' = lines picture
+    height' = length lines'
+    width' = maximum $ length <$> lines'
+
+    aliveCells' = do
+      (y, line) <- zip [0..] lines'
       (x, char) <- zip [0..] line
       guard $ char == '*'
       return $ Cell x y
 
 renderTextPicture :: Grid -> String
-renderTextPicture grid = intercalate "\n" $ renderLine <$> rangeY grid
+renderTextPicture grid = intercalate "\n" $ renderLine <$> rangeOfY grid
   where
     renderCell cell = if cell `isAliveIn` grid then '*' else '.'
-    renderLine y = (\x -> renderCell $ Cell x y) <$> rangeX grid
+    renderLine y = (\x -> renderCell $ Cell x y) <$> rangeOfX grid
 
 allNeighbours :: Cell -> [Cell]
 allNeighbours (Cell x y) = [Cell (x + dx) (y + dy) |
@@ -61,11 +71,11 @@ cell `countAliveNeighboursIn` grid =
   length $ filter (`isAliveIn` grid) $ allNeighbours cell
 
 nextGeneration :: Grid -> Grid
-nextGeneration grid = emptyGrid `setAlive` aliveCells
+nextGeneration grid @ (Grid w h _) = mkEmptyGrid w h `setAlive` aliveInNextGeneration
   where
-    aliveCells = do
-      x <- rangeX grid
-      y <- rangeY grid
+    aliveInNextGeneration = do
+      x <- rangeOfX grid
+      y <- rangeOfY grid
 
       let cell = Cell x y
           aliveNeighbours = cell `countAliveNeighboursIn` grid
