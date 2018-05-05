@@ -1,9 +1,13 @@
 import Data.Set hiding (filter, take)
 import qualified Data.Set as Set
-import Data.List(intercalate)
+import Data.List(intercalate, intersperse)
+
+import Text.Printf
+import System.Environment
 
 import Control.Monad
 import Control.Arrow
+import Control.Concurrent
 
 data Cell = Cell { cellX :: Int, cellY :: Int } deriving (Show, Read, Eq, Ord)
 
@@ -89,20 +93,36 @@ nextGeneration grid @ (Grid w h _) = mkEmptyGrid w h `setAlive` aliveInNextGener
 generations :: Grid -> [Grid]
 generations = iterate nextGeneration
 
-picture1 :: String
-picture1 =
-  ".....\n\
-  \.....\n\
-  \.***.\n\
-  \.....\n\
-  \.....\n"
+-- Blow are inpure functions
+
+moveCursorUp :: Int -> IO ()
+moveCursorUp = putStr . printf "\ESC[%dF"
+
+printGenerations :: Int -> Grid -> IO ()
+printGenerations n grid =
+  generations
+    >>> take n
+    >>> zipWith showGeneration [0..]
+    >>> intersperse returnCursor
+    >>> sequence_
+    $ grid
+  where
+    gridHeight = height grid
+
+    returnCursor = do
+      moveCursorUp $ gridHeight + 1
+      threadDelay 500000
+
+    showGeneration :: Int -> Grid -> IO ()
+    showGeneration n' grid' = do
+      putStrLn $ printf "Generation: %4d" n'
+      putStrLn $ renderTextPicture grid'
+
 
 main :: IO()
 main = do
-  let pipeline =
-        parseTextPicture >>>
-        generations >>>
-        take 7 >>>
-        fmap renderTextPicture
-
-  mapM_ putStrLn $ pipeline picture1
+  [fileName, nStr] <- getArgs
+  contents <- readFile fileName
+  let n = read nStr :: Int
+  printGenerations n $ parseTextPicture contents
+  
