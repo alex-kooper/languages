@@ -108,8 +108,8 @@ printGenerations n grid =
     $ grid
   where
     returnCursor = do
-      moveCursorUp $ height grid + 1
       threadDelay 500000
+      moveCursorUp $ height grid + 1
 
     showGeneration :: Int -> Grid -> IO ()
     showGeneration n' grid' = do
