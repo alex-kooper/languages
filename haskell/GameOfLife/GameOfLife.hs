@@ -107,10 +107,8 @@ printGenerations n grid =
     >>> sequence_
     $ grid
   where
-    gridHeight = height grid
-
     returnCursor = do
-      moveCursorUp $ gridHeight + 1
+      moveCursorUp $ height grid + 1
       threadDelay 500000
 
     showGeneration :: Int -> Grid -> IO ()
@@ -125,4 +123,3 @@ main = do
   contents <- readFile fileName
   let n = read nStr :: Int
   printGenerations n $ parseTextPicture contents
-  
