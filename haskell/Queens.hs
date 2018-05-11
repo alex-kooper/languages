@@ -1,14 +1,25 @@
 import Control.Monad
 import System.Environment
+import Text.Printf
 
 type QueenRow = Int
-newtype Board = Board [QueenRow] deriving (Show)
+newtype Board = Board [QueenRow]
 
 emptyBoard :: Board
 emptyBoard = Board []
 
 addQueenInRow :: Board -> QueenRow -> Board
 (Board rows) `addQueenInRow` row = Board $ row : rows
+
+renderBoard :: Board -> String
+renderBoard (Board rows) =
+  unlines [renderRow n | n <- [minimum rows .. maximum rows]]
+  where
+    renderRow row = concatMap (renderCell row) rows
+    renderCell renderedRow row = if renderedRow == row then "Q " else ". "
+
+instance Show Board where
+  show = renderBoard
 
 underAttack :: QueenRow -> Board -> Bool
 underAttack row (Board rows) = rowHasQueens ||
@@ -24,10 +35,10 @@ underAttack row (Board rows) = rowHasQueens ||
     downDiagonal = iterate (subtract 1) $ row - 1
 
 solutions :: Int -> Int -> [Board]
-solutions 0 _ = [emptyBoard]
+solutions _ 0 = [emptyBoard]
 
-solutions nCols nRows = do
-  board <- solutions (nCols - 1) nRows
+solutions nRows nCols = do
+  board <- solutions nRows (nCols - 1)
   row <- [1 .. nRows]
   guard $ not $ underAttack row board
   return $ board `addQueenInRow` row
@@ -35,4 +46,14 @@ solutions nCols nRows = do
 main :: IO ()
 main = do
   [nCols, nRows] <- map (read :: String -> Int) <$> getArgs
-  putStrLn $ "Number of solutions: " ++ show (length $ solutions nCols nRows)
+
+  let s = solutions nCols nRows
+      n = length s
+
+  printf "There are %d solutions for the %dx%d board.\n" n nRows nCols
+
+  when (n > 0) $ do
+    putStrLn ""
+    putStrLn "Here is one of them"
+    putStrLn ""
+    print $ head s
