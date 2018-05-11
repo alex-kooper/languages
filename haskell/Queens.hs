@@ -10,23 +10,18 @@ emptyBoard = Board []
 addQueenInRow :: Board -> QueenRow -> Board
 (Board rows) `addQueenInRow` row = Board $ row : rows
 
-rowHasQueens :: QueenRow -> Board -> Bool
-rowHasQueens row (Board rows) = row `elem` rows
-
-upDiagonalHasQueens :: QueenRow -> Board -> Bool
-upDiagonalHasQueens row (Board rows) = or $ zipWith (==) diagonal rows
-  where
-    diagonal = iterate (+1) $ row + 1
-
-downDiagonalHasQueens :: QueenRow -> Board -> Bool
-downDiagonalHasQueens row (Board rows) = or $ zipWith (==) diagonal rows
-  where
-    diagonal = iterate (subtract 1) $ row - 1
-
 underAttack :: QueenRow -> Board -> Bool
-underAttack row board = rowHasQueens row board ||
-                        upDiagonalHasQueens row board ||
-                        downDiagonalHasQueens row board
+underAttack row (Board rows) = rowHasQueens ||
+                               upDiagonalHasQueens ||
+                               downDiagonalHasQueens
+  where
+    rowHasQueens = row `elem` rows
+
+    upDiagonalHasQueens = or $ zipWith (==) upDiagonal rows
+    upDiagonal = iterate (+1) $ row + 1
+
+    downDiagonalHasQueens = or $ zipWith (==) downDiagonal rows
+    downDiagonal = iterate (subtract 1) $ row - 1
 
 solutions :: Int -> Int -> [Board]
 solutions 0 _ = [emptyBoard]
@@ -41,4 +36,3 @@ main :: IO ()
 main = do
   [nCols, nRows] <- map (read :: String -> Int) <$> getArgs
   putStrLn $ "Number of solutions: " ++ show (length $ solutions nCols nRows)
-  
