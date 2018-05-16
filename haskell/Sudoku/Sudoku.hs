@@ -5,6 +5,7 @@ import qualified Data.Map as Map
 import Data.Map (Map)
 import Control.Monad
 import System.Environment
+import Text.Printf
 
 type Digit = Int
 type Row = Int
@@ -35,11 +36,25 @@ parseGrid s = Grid $ Map.fromList cellsWithDigits
       return ((rowNumber, columnNumber), digit)
 
 renderGrid :: Grid -> String
-renderGrid grid = unlines [renderRow row | row <- [1..9]]
+renderGrid grid = unlines
+  [ renderRow 1, separator1
+  , renderRow 2, separator1
+  , renderRow 3, separator2
+  , renderRow 4, separator1
+  , renderRow 5, separator1
+  , renderRow 6, separator2
+  , renderRow 7, separator1
+  , renderRow 8, separator1
+  , renderRow 9 ]
   where
-    renderRow row = concat [renderCell row col | col <- [1..9]]
-    renderCell row col = fromMaybe " . " $ showDigit <$> grid `getCell` (row, col)
-    showDigit d = [' ', head $ show d, ' ']
+    renderRow row =
+      printf "%s  %s  %s | %s  %s  %s | %s  %s  %s"
+             (c 1) (c 2) (c 3) (c 4) (c 5) (c 6) (c 7) (c 8) (c 9)
+      where
+        c i = fromMaybe "." $ show <$> grid `getCell` (row, i)
+
+    separator1 = "        |         |        "
+    separator2 = "--------+---------+--------"
 
 main :: IO ()
 main = do
