@@ -37,15 +37,9 @@ parseGrid s = Grid $ Map.fromList cellsWithDigits
 
 renderGrid :: Grid -> String
 renderGrid grid = unlines
-  [ renderRow 1, separator1
-  , renderRow 2, separator1
-  , renderRow 3, separator2
-  , renderRow 4, separator1
-  , renderRow 5, separator1
-  , renderRow 6, separator2
-  , renderRow 7, separator1
-  , renderRow 8, separator1
-  , renderRow 9 ]
+  [ renderRow 1, separator1, renderRow 2, separator1, renderRow 3, separator2
+  , renderRow 4, separator1, renderRow 5, separator1, renderRow 6, separator2
+  , renderRow 7, separator1, renderRow 8, separator1, renderRow 9]
   where
     renderRow row =
       printf "%s  %s  %s | %s  %s  %s | %s  %s  %s"
