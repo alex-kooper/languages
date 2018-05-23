@@ -1,8 +1,14 @@
 
 import Data.Char
 import Data.Maybe
+import Data.Foldable
+
 import qualified Data.Map as Map
 import Data.Map (Map)
+
+import qualified Data.Set as Set
+import Data.Set (Set, union, (\\))
+
 import Control.Monad
 import System.Environment
 import Text.Printf
@@ -14,11 +20,40 @@ type Cell = (Row, Column)
 
 newtype Grid = Grid (Map Cell Digit)
 
+type CellConstraints = Map Cell (Set Digit)
+
 addCell :: Grid -> Cell -> Digit -> Grid
 addCell (Grid gridMap) cell digit = Grid $ Map.insert cell digit gridMap
 
 getCell :: Grid -> Cell -> Maybe Digit
 getCell (Grid gridMap) cell = Map.lookup cell gridMap
+
+unknownCells :: Grid -> [Cell]
+unknownCells grid = [cell | (cell, Nothing) <- cellsWithValues]
+  where
+    cellsWithValues = [((r, c), grid `getCell` (r, c)) | r <- [1..9], c <- [1..9]]
+
+initialCellConstraints :: Grid -> CellConstraints
+initialCellConstraints grid = Map.fromList [(c, cellConstraint c) | c <- unknownCells grid]
+  where
+    cellConstraint cell = Set.fromList [1..9] \\ relatedCellValues cell
+    relatedCellValues = Set.fromList .
+                        catMaybes .
+                        fmap (grid `getCell`) .
+                        toList .
+                        relatedCells
+
+relatedCells :: Cell -> Set Cell
+relatedCells (row, column) = rowCells `union` columnCells `union` subgridCells
+  where
+    rowCells = Set.fromList [(row, c) | c <- [1..9]]
+    columnCells = Set.fromList [(r, column) | r <- [1..9]]
+
+    subgridCells = Set.fromList [(r, c) | r <- [subgridFirst row .. subgridLast row],
+                                          c <- [subgridFirst column .. subgridLast column]]
+
+    subgridFirst x = (x - 1) `div` 3 * 3 + 1
+    subgridLast x = subgridFirst x + 3 - 1
 
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromList cellsWithDigits
