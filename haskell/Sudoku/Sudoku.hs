@@ -43,6 +43,14 @@ initialCellConstraints grid = Map.fromList [(c, cellConstraint c) | c <- unknown
                         toList .
                         relatedCells
 
+-- Propagate constraint for all the unknown cells after fixing the value
+-- of one unknown cell (row, column) to value digit
+fixCellValue :: CellConstraints -> Cell -> Digit -> CellConstraints
+fixCellValue constraints (row, column) digit = Map.delete (row, column) adjustConstraints
+  where
+    adjustConstraint constraints (row, column) = Map.adjust (Set.delete digit) (row, column) constraints
+    adjustConstraints = foldl adjustConstraint constraints $ relatedCells (row, column)
+
 relatedCells :: Cell -> Set Cell
 relatedCells (row, column) = rowCells `union` columnCells `union` subgridCells
   where
