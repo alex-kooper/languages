@@ -4,7 +4,7 @@ import Data.Maybe
 import Data.Foldable
 
 import qualified Data.Map as Map
-import Data.Map (Map)
+import Data.Map (Map, assocs)
 
 import qualified Data.Set as Set
 import Data.Set (Set, union, (\\))
@@ -33,6 +33,18 @@ unknownCells grid = [cell | (cell, Nothing) <- cellsWithValues]
   where
     cellsWithValues = [((r, c), grid `getCell` (r, c)) | r <- [1..9], c <- [1..9]]
 
+relatedCells :: Cell -> Set Cell
+relatedCells (row, column) = rowCells `union` columnCells `union` subgridCells
+  where
+    rowCells = Set.fromList [(row, c) | c <- [1..9]]
+    columnCells = Set.fromList [(r, column) | r <- [1..9]]
+
+    subgridCells = Set.fromList [(r, c) | r <- [subgridFirst row .. subgridLast row],
+                                          c <- [subgridFirst column .. subgridLast column]]
+
+    subgridFirst x = (x - 1) `div` 3 * 3 + 1
+    subgridLast x = subgridFirst x + 3 - 1
+
 initialCellConstraints :: Grid -> CellConstraints
 initialCellConstraints grid = Map.fromList [(c, cellConstraint c) | c <- unknownCells grid]
   where
@@ -51,17 +63,20 @@ fixCellValue constraints (row, column) digit = Map.delete (row, column) adjustCo
     adjustConstraint constraints (row, column) = Map.adjust (Set.delete digit) (row, column) constraints
     adjustConstraints = foldl adjustConstraint constraints $ relatedCells (row, column)
 
-relatedCells :: Cell -> Set Cell
-relatedCells (row, column) = rowCells `union` columnCells `union` subgridCells
+solve :: Grid -> [Grid]
+solve unsolvedGrid = findSoutions unsolvedGrid $ initialCellConstraints unsolvedGrid
   where
-    rowCells = Set.fromList [(row, c) | c <- [1..9]]
-    columnCells = Set.fromList [(r, column) | r <- [1..9]]
+    findSoutions :: Grid -> CellConstraints -> [Grid]
+    findSoutions grid constraints
+      | null constraints = [grid]
+      | otherwise        = do
+        let (cell, values) = head $ assocs constraints
+        value <- toList values
 
-    subgridCells = Set.fromList [(r, c) | r <- [subgridFirst row .. subgridLast row],
-                                          c <- [subgridFirst column .. subgridLast column]]
+        let constraints' = fixCellValue constraints cell value
+            grid' = addCell grid cell value
 
-    subgridFirst x = (x - 1) `div` 3 * 3 + 1
-    subgridLast x = subgridFirst x + 3 - 1
+        findSoutions grid' constraints'
 
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromList cellsWithDigits
@@ -97,4 +112,4 @@ main :: IO ()
 main = do
   [fileName] <- getArgs
   contents <- readFile fileName
-  putStrLn $ renderGrid $ parseGrid contents
+  putStrLn $ renderGrid $ head $ solve $ parseGrid contents
