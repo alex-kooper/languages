@@ -12,6 +12,7 @@ import Data.Set (Set, union, (\\), size)
 
 import Control.Monad
 import System.Environment
+import System.Exit
 import Text.Printf
 
 type Digit = Int
@@ -117,6 +118,12 @@ renderGrid grid = unlines
 
 main :: IO ()
 main = do
-  [fileName] <- getArgs
+  args <- getArgs
+
+  when (length args /= 1) $ do
+    printf "Usage: %s file\n" =<< getProgName
+    exitWith $ ExitFailure 1
+
+  let [fileName] = args
   contents <- readFile fileName
   putStrLn $ renderGrid $ head $ solve $ parseGrid contents
