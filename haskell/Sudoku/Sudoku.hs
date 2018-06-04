@@ -2,12 +2,13 @@
 import Data.Char
 import Data.Maybe
 import Data.Foldable
+import Data.Ord
 
 import qualified Data.Map as Map
 import Data.Map (Map, assocs)
 
 import qualified Data.Set as Set
-import Data.Set (Set, union, (\\))
+import Data.Set (Set, union, (\\), size)
 
 import Control.Monad
 import System.Environment
@@ -63,6 +64,11 @@ fixCellValue constraints (row, column) digit = Map.delete (row, column) adjustCo
     adjustConstraint constraints (row, column) = Map.adjust (Set.delete digit) (row, column) constraints
     adjustConstraints = foldl adjustConstraint constraints $ relatedCells (row, column)
 
+mostConstraintedCell :: CellConstraints -> (Cell, Set Digit)
+mostConstraintedCell = minimumBy (comparing numberOfDigits) . assocs
+  where
+    numberOfDigits (_, values) = size values
+
 solve :: Grid -> [Grid]
 solve unsolvedGrid = findSoutions unsolvedGrid $ initialCellConstraints unsolvedGrid
   where
@@ -70,13 +76,14 @@ solve unsolvedGrid = findSoutions unsolvedGrid $ initialCellConstraints unsolved
     findSoutions grid constraints
       | null constraints = [grid]
       | otherwise        = do
-        let (cell, values) = head $ assocs constraints
+        let (cell, values) = mostConstraintedCell constraints
         value <- toList values
 
         let constraints' = fixCellValue constraints cell value
             grid' = addCell grid cell value
 
         findSoutions grid' constraints'
+
 
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromList cellsWithDigits
