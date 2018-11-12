@@ -10,24 +10,11 @@ object DataMinrPairCoding extends App {
 
   type Tokens = String
 
-  def tokens(s: String): Stream[Tokens] = {
-    if (s.isEmpty) {
-      Stream.empty
-    } else if(s.startsWith("A")) {
-      val (id, rest) = s.splitAt(4)
-      id #:: tokens(rest)
-    } else if(s.startsWith("I")) {
-      val (id, rest) = s.splitAt(3)
-      id #:: tokens(rest)
-    } else if(s.head.isDigit) {
-      val (n, rest) = s.span(_.isDigit)
-      n #:: tokens(rest)
-    } else throw new Exception("Bad Format of the Input String")
-  }
+  def tokens(s: String): Iterator[Tokens] = raw"A\w{3}|I\w{2}|\d+".r.findAllIn(s)
 
   def parseIntoMap(s: String) = {
     tokens(s).grouped(2).map {
-      case Stream(a, b) => (a, b.toInt)
+      case List(a, b) => (a, b.toInt)
     }
     .toStream
     .groupBy(_._1)
