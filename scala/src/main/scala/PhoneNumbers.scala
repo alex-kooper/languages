@@ -16,12 +16,10 @@ object PhoneNumbers extends App {
   def phoneNumberToWords(s: String): Seq[String] = {
     if(s.isEmpty) {
       Seq("")
-    } else {
-      for {
-        tail <- phoneNumberToWords(s.drop(1))
-        head <- digitsToChars(s.head)
-      } yield head + tail
-    }
+    } else for {
+      tail <- phoneNumberToWords(s.drop(1))
+      head <- digitsToChars(s.head)
+    } yield head + tail
   }
 
   def phoneNumberToWordsFormatted(s: String): String = phoneNumberToWords(s).sorted.mkString(",")
