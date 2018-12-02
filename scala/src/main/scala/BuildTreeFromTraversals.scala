@@ -20,7 +20,7 @@ case object Leaf extends Tree[Nothing] {
   override def toString = "()"
 }
 
-object BuildTreeFromTraverals extends App {
+object BuildTreeFromTraversals {
 
   protected def lazyBuildTree[T](preOrder: Seq[T], inOrder: Seq[T]): (Tree[T], Seq[T]) =
     if(inOrder.isEmpty) (Leaf, preOrder) else {
@@ -34,11 +34,11 @@ object BuildTreeFromTraverals extends App {
       (Node(root, leftTree, rightTree), newPreOrder2)
   }
 
-  def buildTree[T](preOrder: Seq[T], inOrder: Seq[T]) = lazyBuildTree(preOrder.view, inOrder.view)._1
+  def buildTree[T](preOrder: Seq[T], inOrder: Seq[T]): Tree[T] = lazyBuildTree(preOrder.view, inOrder.view)._1
 }
 
 object BuildTreeFromTraversalsTests extends App {
-  import BuildTreeFromTraverals.buildTree
+  import BuildTreeFromTraversals.buildTree
 
   def inOrderTraversal[T](t: Tree[T]): Stream[T] = t match {
     case Leaf => Stream.empty
@@ -80,4 +80,5 @@ object BuildTreeFromTraversalsTests extends App {
   val inOrder = Seq('D', 'B', 'E', 'A', 'F', 'C')
 
   println(s"Example tree: ${buildTree(preOrder, inOrder)}")
+  List(1,2).view
 }
