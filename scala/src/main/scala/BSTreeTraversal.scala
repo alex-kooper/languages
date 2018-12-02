@@ -40,7 +40,7 @@ object BSTreeTraversal  extends App {
 
     case BSTNode(a, left, right) =>
       println(s"node $a")
-      val rs = a #::traverse(right, acc)
+      val rs = a #:: traverse(right, acc)
       traverse(left, rs)
   }
 
