@@ -22,12 +22,8 @@ case object Leaf extends Tree[Nothing] {
 
 object BuildTreeFromTraverals extends App {
 
-  protected def lazyBuildTree[T](preOrder: Seq[T], inOrder: Seq[T]): (Tree[T], Seq[T]) = inOrder match {
-    case Seq() => (Leaf, preOrder)
-
-    case Seq(v) => (Node(v, Leaf, Leaf), preOrder.tail)
-
-    case _ =>
+  protected def lazyBuildTree[T](preOrder: Seq[T], inOrder: Seq[T]): (Tree[T], Seq[T]) =
+    if(inOrder.isEmpty) (Leaf, preOrder) else {
       val root = preOrder.head
       val (left, rightWithRoot) = inOrder.span(_ != root)
       val right = rightWithRoot.tail
