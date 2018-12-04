@@ -23,7 +23,9 @@ case object Leaf extends Tree[Nothing] {
 object BuildTreeFromTraversals {
 
   protected def lazyBuildTree[T](preOrder: Seq[T], inOrder: Seq[T]): (Tree[T], Seq[T]) =
-    if(inOrder.isEmpty) (Leaf, preOrder) else {
+    if(inOrder.isEmpty)
+      (Leaf, preOrder)
+    else {
       val root = preOrder.head
       val (left, rightWithRoot) = inOrder.span(_ != root)
       val right = rightWithRoot.tail
@@ -37,8 +39,30 @@ object BuildTreeFromTraversals {
   def buildTree[T](preOrder: Seq[T], inOrder: Seq[T]): Tree[T] = lazyBuildTree(preOrder.view, inOrder.view)._1
 }
 
+object BuildTreeFromTraversalsM {
+  import cats.data._
+
+  def buildTreeM[T](inOrder: Seq[T]): State[Seq[T], Tree[T]] =
+    if(inOrder.isEmpty)
+      State.pure(Leaf)
+    else for {
+      root <- State.inspect[Seq[T], T](_.head)
+      _ <- State.modify[Seq[T]](_.tail)
+
+      (left, rightWithRoot) = inOrder.span(_ != root)
+      right = rightWithRoot.tail
+
+      leftTree <- buildTreeM(left)
+      rightTree <- buildTreeM(right)
+    } yield Node(root, leftTree, rightTree)
+
+  def buildTree[T](preOrder: Seq[T], inOrder: Seq[T]): Tree[T] =
+    buildTreeM(inOrder).runA(preOrder).value
+}
+
+
 object BuildTreeFromTraversalsTests extends App {
-  import BuildTreeFromTraversals.buildTree
+  import BuildTreeFromTraversalsM.buildTree
 
   def inOrderTraversal[T](t: Tree[T]): Stream[T] = t match {
     case Leaf => Stream.empty
@@ -80,5 +104,4 @@ object BuildTreeFromTraversalsTests extends App {
   val inOrder = Seq('D', 'B', 'E', 'A', 'F', 'C')
 
   println(s"Example tree: ${buildTree(preOrder, inOrder)}")
-  List(1,2).view
 }
