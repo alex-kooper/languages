@@ -19,7 +19,6 @@
   Write a program that determines if there is a way to interpret his message while leaving the parentheses balanced.
 */
 
-import cats._
 import cats.implicits._
 
 import scala.annotation.tailrec
