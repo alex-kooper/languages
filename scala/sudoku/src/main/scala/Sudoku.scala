@@ -13,14 +13,14 @@ case class Grid(gridMap: Map[Cell, Digit]) {
   def set(c: Cell, d: Digit) = Grid(gridMap + (c -> d))
   def apply(r: Row, c: Column): Option[Digit] = gridMap.get((r, c))
 
-  private[this] def renderRow(r: Row): String = {
+  private def renderRow(r: Row): String = {
     def c(i: Column) = this(r, i).map(_.toString).getOrElse(".")
 
     s"${c(0)}  ${c(1)}  ${c(2)} | ${c(3)}  ${c(4)}  ${c(5)} | ${c(6)}  ${c(7)}  ${c(8)}"
   }
 
-  private[this] val separator1 = "        |         |        "
-  private[this] val separator2 = "--------+---------+--------"
+  private val separator1 = "        |         |        "
+  private val separator2 = "--------+---------+--------"
 
   def render: String = {
     List(
@@ -51,7 +51,7 @@ object Grid {
 object SudokuSolver {
   type CellConstraints = Map[Cell, Set[Digit]]
 
-  private def unknownCells(grid: Grid): Seq[Cell] = {
+  def unknownCells(grid: Grid): Seq[Cell] = {
     for {
       r <- 0 until 9
       c <- 0 until 9
@@ -59,7 +59,7 @@ object SudokuSolver {
     } yield (r, c)
   }
 
-  private def relatedCells(row: Row, column: Column): Set[Cell] = {
+  def relatedCells(row: Row, column: Column): Set[Cell] = {
     val rowCells = (0 until 9).map((row, _)).toSet
     val columnCells = (0 until 9).map((_, column)).toSet
 
@@ -90,9 +90,53 @@ object SudokuSolver {
       case (r, c) => (r, c) -> cellConstraint(r, c)
     }.toMap
   }
+
+  def fixCellValue(constraints: CellConstraints, cell: Cell, digit: Digit): CellConstraints = {
+    val (row, column) = cell
+
+    val adjustedConstraints = relatedCells(row, column).foldLeft(constraints) {
+      (constraints, cell) => {
+        val values = constraints.get(cell)
+
+        if(values.nonEmpty)
+          constraints.updated(cell, values.get - digit)
+        else
+          constraints
+      }
+    }
+
+    adjustedConstraints.removed(cell)
+  }
+
+  def mostConstraintedCell(constraints: CellConstraints): (Cell, Set[Digit]) =
+    constraints.minBy {
+      case _ -> values => values.size
+    }
+
+  def findSolutions(grid: Grid, constraints: CellConstraints): LazyList[Grid] = {
+    if(constraints.isEmpty) {
+      LazyList(grid)
+    } else {
+      val (cell, values) = mostConstraintedCell(constraints)
+
+      val solutions = for {
+        value <- values.to(LazyList)
+        newConstraints = fixCellValue(constraints, cell, value)
+        newGrid = grid.set(cell, value)
+      } yield findSolutions(newGrid, newConstraints)
+
+      solutions.flatten
+    }
+  }
+
+  def solve(grid: Grid): LazyList[Grid] = findSolutions(grid, initialCellConstraints(grid))
 }
 
 object Sudoku extends App {
+  import SudokuSolver.solve
+
   val s = Source.fromResource("puzzle1.txt").mkString
-  println(Grid.parse(s).render)
+
+  println("\nSolution\n")
+  println(solve(Grid.parse(s)).head.render)
 }
