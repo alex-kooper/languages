@@ -96,12 +96,10 @@ object SudokuSolver {
 
     val adjustedConstraints = relatedCells(row, column).foldLeft(constraints) {
       (constraints, cell) => {
-        val values = constraints.get(cell)
-
-        if(values.nonEmpty)
-          constraints.updated(cell, values.get - digit)
-        else
-          constraints
+        constraints.get(cell) match {
+          case Some(values) => constraints.updated(cell, values - digit)
+          case None => constraints
+        }
       }
     }
 
