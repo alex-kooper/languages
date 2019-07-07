@@ -6,12 +6,12 @@ import Effect (Effect)
 import Effect.Console (log)
 
 import Data.Maybe(Maybe, isNothing, fromMaybe)
-import Data.Array (length, zip, (..), filter, null)
+import Data.Array (length, zip, (..), filter, null, catMaybes)
 
 import Data.Map (Map)
 import Data.Map as Map
 
-import Data.Set (Set, union)
+import Data.Set (Set, union, difference, toUnfoldable)
 import Data.Set as Set
 
 import Data.Char.Unicode (isDigit)
@@ -60,6 +60,21 @@ relatedCells { row, column } = rowCells `union` columnCells `union` subgridCells
     subgridFirst x = (x - 1) `div` 3 * 3 + 1
     subgridLast x = subgridFirst x + 3 - 1
 
+initialCellConstraints :: Grid -> CellConstraints
+initialCellConstraints grid  = 
+  unknownCells
+  >>> map (\c -> (Tuple c (cellConstraint c)))
+  >>> Map.fromFoldable
+  $ grid 
+  
+  where
+    cellConstraint cell = Set.fromFoldable (1 .. 9) `difference` relatedCellValues cell
+    relatedCellValues = 
+      relatedCells
+      >>> toUnfoldable
+      >>> map (grid `getCell` _)
+      >>> catMaybes
+      >>> Set.fromFoldable
 
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromFoldable cellsWithDigits

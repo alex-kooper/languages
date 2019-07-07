@@ -7,6 +7,7 @@ You can edit this file as you like.
 , dependencies =
     [ "console"
     , "effect"
+    , "filterable"
     , "integers"
     , "ordered-collections"
     , "psci-support"
