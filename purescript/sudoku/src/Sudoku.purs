@@ -5,8 +5,8 @@ import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 
-import Data.Maybe(Maybe, isNothing)
-import Data.Array((..), filter, zip, length)
+import Data.Maybe(Maybe, isNothing, fromMaybe)
+import Data.Array (length, zip, (..), filter, null)
 
 import Data.Map (Map)
 import Data.Map as Map
@@ -15,12 +15,12 @@ import Data.Set (Set, union)
 import Data.Set as Set
 
 import Data.Char.Unicode (isDigit)
-import Data.String.Utils (lines)
 import Control.MonadZero (guard)
-import Data.Tuple
+import Data.Tuple (Tuple(..))
 import Data.Int (fromString)
-import Data.String (singleton)
-import Data.String.Utils (lines, toCharArray)
+import Data.String.Utils (lines)
+import Data.String.CodeUnits (singleton, toCharArray)
+import Data.Foldable (intercalate)
 
 type Digit = Int
 type Row = Int
@@ -60,26 +60,70 @@ relatedCells { row, column } = rowCells `union` columnCells `union` subgridCells
     subgridFirst x = (x - 1) `div` 3 * 3 + 1
     subgridLast x = subgridFirst x + 3 - 1
 
-{-
+
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromFoldable cellsWithDigits
   where
-    filterLine :: Array Char -> Array Char
     filterLine = filter (\c -> isDigit c || c == '.')
-    filteredLines = map (toCharArray >>> filterLine) $ lines s
-
+    
+    filteredLines = 
+      lines
+      >>> map(toCharArray >>> filterLine)
+      >>> filter (not <<< null)
+      $ s    
+    
     cellsWithDigits = do
       (Tuple row rowNumber) <- zipWithIndex filteredLines
-      (Tuple char columnNumber) <- zipWithIndex $ row
-
+      (Tuple char columnNumber) <- zipWithIndex row
       guard $ isDigit char
-      let digit = fromString $ singleton char
+      
+      let digit = fromMaybe 0 $ fromString $ singleton char
+      
+      pure $ Tuple { row: rowNumber, column: columnNumber } digit
 
-      pure Tuple { row: rowNumber, column: columnNumber } digit
-    
-    zipWithIndex xs = zip xs (1 .. length xs)
--}
+    zipWithIndex :: forall a. Array a -> Array (Tuple a Int)
+    zipWithIndex xs = zip xs $ 1 .. length xs
+
+
+renderGrid :: Grid -> String
+renderGrid grid = intercalate "\n"
+  [ renderRow 1, separator1, renderRow 2, separator1, renderRow 3, separator2
+  , renderRow 4, separator1, renderRow 5, separator1, renderRow 6, separator2
+  , renderRow 7, separator1, renderRow 8, separator1, renderRow 9]
+  where
+    renderRow row = 
+      (c 1) <> "  " <> (c 2) <> "  " <> (c 3) <> " | " <>
+      (c 4) <> "  " <> (c 5) <> "  " <> (c 6) <> " | " <>
+      (c 7) <> "  " <> (c 8) <> "  " <> (c 9)
+
+      where
+        c i = fromMaybe "." $ show <$> grid `getCell` { row, column: i }
+
+    separator1 = "        |         |        "
+    separator2 = "--------+---------+--------"
+
+
+puzzle :: String
+puzzle = """
+.  .  4 | 8  .  . | .  1  7
+        |         |        
+6  7  . | 9  .  . | .  .  .
+        |         |        
+5  .  8 | .  3  . | .  .  4
+--------+---------+--------
+3  .  . | 7  4  . | 1  .  .
+        |         |        
+.  6  9 | .  .  . | 7  8  .
+        |         |        
+.  .  1 | .  6  9 | .  .  5
+--------+---------+--------
+1  .  . | .  8  . | 3  .  6
+        |         |        
+.  .  . | .  .  6 | .  9  1
+        |         |        
+2  4  . | .  .  1 | 5  .  .
+"""
 
 main :: Effect Unit
 main = do
-  log "Hello, World!"
+  log $ renderGrid $ parseGrid puzzle
