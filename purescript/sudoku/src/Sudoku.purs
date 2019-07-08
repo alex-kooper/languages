@@ -5,13 +5,13 @@ import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 
-import Data.Maybe(Maybe, isNothing, fromMaybe)
+import Data.Maybe(Maybe(Just), isNothing, fromMaybe)
 import Data.Array (length, zip, (..), filter, null, catMaybes)
 
 import Data.Map (Map)
 import Data.Map as Map
 
-import Data.Set (Set, union, difference, toUnfoldable)
+import Data.Set (Set, union, difference, size)
 import Data.Set as Set
 
 import Data.Char.Unicode (isDigit)
@@ -20,7 +20,7 @@ import Data.Tuple (Tuple(..))
 import Data.Int (fromString)
 import Data.String.Utils (lines)
 import Data.String.CodeUnits (singleton, toCharArray)
-import Data.Foldable (intercalate)
+import Data.Foldable (intercalate, foldl, minimumBy)
 
 type Digit = Int
 type Row = Int
@@ -45,6 +45,7 @@ unknownCells grid = do
   let cell = { row, column }
   guard $ isNothing $ grid `getCell` cell
   pure cell
+
 
 relatedCells :: Cell -> Set Cell
 relatedCells { row, column } = rowCells `union` columnCells `union` subgridCells
@@ -71,10 +72,31 @@ initialCellConstraints grid  =
     cellConstraint cell = Set.fromFoldable (1 .. 9) `difference` relatedCellValues cell
     relatedCellValues = 
       relatedCells
-      >>> toUnfoldable
+      >>> Set.toUnfoldable
       >>> map (grid `getCell` _)
       >>> catMaybes
       >>> Set.fromFoldable
+
+
+-- Propagate constraint for all the unknown cells after fixing the value
+-- of one unknown cell (row, column) to value digit
+fixCellValue :: CellConstraints -> Cell -> Digit -> CellConstraints
+fixCellValue constraints { row, column } digit = Map.delete { row, column } adjustConstraints
+  where
+    adjustConstraint cs { row: r, column: c } = 
+      Map.update (Just <<< (Set.delete digit)) { row: r, column: c } cs
+    
+    adjustConstraints = foldl adjustConstraint constraints $ relatedCells { row, column }
+
+
+mostConstraintedCell :: CellConstraints -> Maybe (Tuple Cell (Set Digit))
+mostConstraintedCell = minimumBy (comparing numberOfDigits) <<< toArray
+  where
+    numberOfDigits (Tuple _ values) = size values
+    
+    toArray :: CellConstraints -> Array (Tuple Cell (Set Digit))
+    toArray = Map.toUnfoldable
+
 
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromFoldable cellsWithDigits
