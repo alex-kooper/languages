@@ -2,9 +2,6 @@ module Main where
 
 import Prelude
 
-import Effect (Effect)
-import Effect.Console (log)
-
 import Data.Maybe(Maybe(Just, Nothing), isNothing, fromMaybe)
 import Data.Array (length, zip, (..), filter, null, catMaybes, head)
 
@@ -21,6 +18,11 @@ import Data.Int (fromString)
 import Data.String.Utils (lines)
 import Data.String.CodeUnits (singleton, toCharArray)
 import Data.Foldable (intercalate, foldl, minimumBy)
+
+import Effect (Effect)
+import Effect.Console (log)
+import Node.Encoding (Encoding(..))
+import Node.FS.Sync (readTextFile)
 
 type Digit = Int
 type Row = Int
@@ -155,27 +157,12 @@ renderGrid grid = intercalate "\n"
     separator2 = "--------+---------+--------"
 
 
-puzzle :: String
-puzzle = """
-.  .  4 | 8  .  . | .  1  7
-        |         |        
-6  7  . | 9  .  . | .  .  .
-        |         |        
-5  .  8 | .  3  . | .  .  4
---------+---------+--------
-3  .  . | 7  4  . | 1  .  .
-        |         |        
-.  6  9 | .  .  . | 7  8  .
-        |         |        
-.  .  1 | .  6  9 | .  .  5
---------+---------+--------
-1  .  . | .  8  . | 3  .  6
-        |         |        
-.  .  . | .  .  6 | .  9  1
-        |         |        
-2  4  . | .  .  1 | 5  .  .
-"""
-
 main :: Effect Unit
-main = do
-  log $ fromMaybe "" $ map renderGrid $ head $ solve $ parseGrid puzzle
+main = log =<< map process (readTextFile UTF8 "puzzles/puzzle2.txt")
+  where
+    process = 
+      parseGrid 
+      >>> solve 
+      >>> head 
+      >>> map renderGrid 
+      >>> fromMaybe "There is no solution to this Sudoku puzzle"
