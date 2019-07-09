@@ -5,8 +5,8 @@ import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 
-import Data.Maybe(Maybe(Just), isNothing, fromMaybe)
-import Data.Array (length, zip, (..), filter, null, catMaybes)
+import Data.Maybe(Maybe(Just, Nothing), isNothing, fromMaybe)
+import Data.Array (length, zip, (..), filter, null, catMaybes, head)
 
 import Data.Map (Map)
 import Data.Map as Map
@@ -98,6 +98,21 @@ mostConstraintedCell = minimumBy (comparing numberOfDigits) <<< toArray
     toArray = Map.toUnfoldable
 
 
+solve :: Grid -> Array Grid
+solve unsolvedGrid = findSoutions unsolvedGrid $ initialCellConstraints unsolvedGrid
+  where
+    findSoutions :: Grid -> CellConstraints -> Array Grid
+    findSoutions grid constraints = case mostConstraintedCell constraints of
+      Nothing -> [grid]
+      Just (Tuple cell values) -> do
+        value <- Set.toUnfoldable values
+
+        let constraints' = fixCellValue constraints cell value
+            grid' = addCell grid cell value
+
+        findSoutions grid' constraints'    
+
+
 parseGrid :: String -> Grid
 parseGrid s = Grid $ Map.fromFoldable cellsWithDigits
   where
@@ -163,4 +178,4 @@ puzzle = """
 
 main :: Effect Unit
 main = do
-  log $ renderGrid $ parseGrid puzzle
+  log $ fromMaybe "" $ map renderGrid $ head $ solve $ parseGrid puzzle
