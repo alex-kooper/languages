@@ -158,11 +158,14 @@ renderGrid grid = intercalate "\n"
 
 
 main :: Effect Unit
-main = log =<< map process (readTextFile UTF8 "puzzles/puzzle2.txt")
+main = 
+  readTextFile UTF8 "puzzles/puzzle2.txt"
+  >>= pure <<< process 
+  >>= log
   where
     process = 
       parseGrid 
-      >>> solve 
+      >>> solve
       >>> head 
       >>> map renderGrid 
       >>> fromMaybe "There is no solution to this Sudoku puzzle"
