@@ -2,8 +2,7 @@ module Main where
 
 import Prelude
 
-import Control.MonadZero (guard)
-import Data.Array ((..), zip)
+import Data.Array ((..), zip, filter)
 import Data.Array as A
 import Data.Foldable (intercalate, maximum)
 import Data.Maybe (fromMaybe)
@@ -12,6 +11,9 @@ import Data.Set as Set
 import Data.String.CodeUnits as S
 import Data.String.Utils (lines)
 import Data.Tuple (Tuple(..))
+import Data.List.Lazy (List, iterate, (!!))
+
+import Control.MonadZero (guard)
 import Effect (Effect)
 import Effect.Console (log)
 
@@ -70,6 +72,37 @@ renderTextPicture grid = intercalate "\n" $ renderLine <$> rangeOfY grid
     renderCell cell = if cell `isAliveIn` grid then '*' else '.'
     renderLine y = S.fromCharArray $ (\x -> renderCell $ { x, y }) <$> rangeOfX grid
 
+allNeighbours :: Cell -> Array Cell
+allNeighbours { x, y } = do
+  dx <- -1 .. 1
+  dy <- -1 .. 1
+  guard $ dx /= 0 || dy /= 0
+  pure { x: x + dx, y: y + dy }
+
+countAliveNeighboursIn :: Cell -> Grid -> Int
+countAliveNeighboursIn cell grid =
+  A.length $ filter (_ `isAliveIn` grid) $ allNeighbours cell
+
+nextGeneration :: Grid -> Grid
+nextGeneration grid @ { width, height } = 
+  mkEmptyGrid width height `setAlive` aliveInNextGeneration
+  where
+    aliveInNextGeneration = do
+      x <- rangeOfX grid
+      y <- rangeOfY grid
+
+      let cell = { x, y }
+          aliveNeighbours = cell `countAliveNeighboursIn` grid
+
+      guard $ aliveNeighbours > 1
+      guard $ aliveNeighbours < 4
+      guard $ aliveNeighbours == 3 || cell `isAliveIn` grid
+
+      pure cell
+
+generations :: Grid -> List Grid
+generations = iterate nextGeneration
+
 example :: String
 example = """
 ..................
@@ -87,5 +120,12 @@ example = """
 
 main :: Effect Unit
 main = do
-  log "Game of Life initial state"
-  log <$> parseTextPicture >>> renderTextPicture $ example
+  log "Game of Life, step 10"  
+  log $ 
+    parseTextPicture 
+    >>> generations 
+    >>> (_ !! 10)
+    >>> map renderTextPicture
+    >>> fromMaybe ""
+    $ example
+  
