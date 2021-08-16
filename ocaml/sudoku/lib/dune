@@ -1,0 +1,4 @@
+(library
+ (name solver)
+ (modules data utils)
+ (libraries base))

@@ -133,7 +133,7 @@ object SudokuSolver {
 object Sudoku extends App {
   import SudokuSolver.solve
 
-  val s = Source.fromResource("puzzle1.txt").mkString
+  val s = Source.fromResource("puzzle3.txt").mkString
 
   println("\nSolution\n")
   println(solve(Grid.parse(s)).head.render)
