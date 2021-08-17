@@ -1,4 +1,4 @@
-open Solver.Utils
+open Sudoku.Utils
 
 let grid = "
 . . 6 . . . 4 . 7 
