@@ -1,4 +1,4 @@
 (library
  (name sudoku)
- (modules data utils)
+ (modules solver data utils)
  (libraries base))
