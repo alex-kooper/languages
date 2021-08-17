@@ -1,13 +1,7 @@
-module Cell : sig
-  type t
-  val create : int -> int -> t
-end
-
 module Grid : sig
   type t
-  type cell = Cell.t
 
   val empty : t
-  val set : cell -> int -> t -> t
-  val get : cell -> t -> int option
+  val set : row:int -> col:int  -> digit:int -> t -> t
+  val get : row:int -> col:int -> t -> int option
 end

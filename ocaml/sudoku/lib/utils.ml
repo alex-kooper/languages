@@ -6,7 +6,7 @@ let grid_to_string grid =
 
   let render_row row = 
     let c i = 
-      Grid.get (Cell.create row i) grid 
+      grid |> Grid.get ~row ~col:i
       |> Option.map Int.to_string 
       |> Option.value ~default:"."  
     in Printf.sprintf "%s  %s  %s | %s  %s  %s | %s  %s  %s"
@@ -50,4 +50,4 @@ let grid_of_string s =
     cells_with_digits 
     ~init:Grid.empty 
     ~f:(fun grid ((row, col), (digit)) -> 
-        grid |> Grid.set (Cell.create row col) digit)
+        grid |> Grid.set ~row ~col ~digit)
