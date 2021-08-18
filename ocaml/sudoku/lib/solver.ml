@@ -64,9 +64,9 @@ let initial_grid_constraints grid =
          grid |> set ~row ~col ~digits)
 
 let fix_cell_digit ~row ~col ~digit grid_constraints =
+  let open GridConstraints in
   related_cells ~row ~col |> Cell_set.to_seq
   |> Seq.fold_left
-       (fun grid (row, col) ->
-         grid |> GridConstraints.remove_digit ~row ~col ~digit)
+       (fun grid (row, col) -> grid |> remove_digit ~row ~col ~digit)
        grid_constraints
-  |> GridConstraints.remove ~row ~col
+  |> remove ~row ~col
