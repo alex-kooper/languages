@@ -3,9 +3,9 @@ module Grid : sig
 
   val empty : t
 
-  val set : row:int -> col:int -> digit:int -> t -> t
-
   val get : row:int -> col:int -> t -> int option
+
+  val set : row:int -> col:int -> digit:int -> t -> t
 end
 
 module Grid_constraints : sig
@@ -14,6 +14,8 @@ module Grid_constraints : sig
   module Digits : Set.S with type elt = int
 
   val empty : t
+
+  val get : row:int -> col:int -> t -> Digits.t option
 
   val set : row:int -> col:int -> digits:Digits.t -> t -> t
 

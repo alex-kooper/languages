@@ -9,11 +9,11 @@ module Grid = struct
 
   type t = int Map.t
 
+  let get ~row ~col = Map.find_opt (row, col)
+
   let empty = Map.empty
 
   let set ~row ~col ~digit = Map.add (row, col) digit
-
-  let get ~row ~col = Map.find_opt (row, col)
 end
 
 module Grid_constraints = struct
@@ -23,6 +23,8 @@ module Grid_constraints = struct
   type t = Digits.t Map.t
 
   let empty = Map.empty
+
+  let get ~row ~col = Map.find_opt (row, col)
 
   let set ~row ~col ~digits = Map.add (row, col) digits
 

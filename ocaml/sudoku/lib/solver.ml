@@ -70,3 +70,20 @@ let fix_cell_digit ~row ~col ~digit grid_constraints =
        (fun grid (row, col) -> grid |> remove_digit ~row ~col ~digit)
        grid_constraints
   |> remove ~row ~col
+
+let most_constraint_cell grid_constraints =
+  let open Base.Sequence in
+  let open Grid_constraints in
+  let constrained_cells =
+    let* row = range 1 10 in
+    let* col = range 1 10 in
+
+    let digits = grid_constraints |> get ~row ~col in
+    let* () = guard @@ Option.is_some digits in
+
+    return ((row, col), Option.get digits)
+  in
+
+  reduce constrained_cells ~f:(fun (cell1, digits1) (cell2, digits2) ->
+      if Digits.cardinal digits2 > Digits.cardinal digits2 then (cell1, digits1)
+      else (cell2, digits2))
