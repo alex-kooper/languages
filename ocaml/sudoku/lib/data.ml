@@ -16,7 +16,7 @@ module Grid = struct
   let get ~row ~col = Map.find_opt (row, col)
 end
 
-module GridConstraints = struct
+module Grid_constraints = struct
   module Digits = Set.Make (Int)
   module Map = Map.Make (Cell)
 

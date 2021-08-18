@@ -8,7 +8,7 @@ module Grid : sig
   val get : row:int -> col:int -> t -> int option
 end
 
-module GridConstraints : sig
+module Grid_constraints : sig
   type t
 
   module Digits : Set.S with type elt = int

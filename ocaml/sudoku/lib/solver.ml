@@ -44,7 +44,7 @@ let related_cells ~row ~col =
   row_cells |> Cell_set.union col_cells |> Cell_set.union subgrid_cells
 
 let initial_grid_constraints grid =
-  let open GridConstraints in
+  let open Grid_constraints in
   let related_cell_values ~row ~col =
     related_cells ~row ~col |> Cell_set.to_seq
     |> Seq.flat_map (fun (row, col) ->
@@ -64,7 +64,7 @@ let initial_grid_constraints grid =
          grid |> set ~row ~col ~digits)
 
 let fix_cell_digit ~row ~col ~digit grid_constraints =
-  let open GridConstraints in
+  let open Grid_constraints in
   related_cells ~row ~col |> Cell_set.to_seq
   |> Seq.fold_left
        (fun grid (row, col) -> grid |> remove_digit ~row ~col ~digit)
