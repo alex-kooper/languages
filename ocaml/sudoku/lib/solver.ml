@@ -42,3 +42,31 @@ let related_cells ~row ~col =
   in
 
   row_cells |> Cell_set.union col_cells |> Cell_set.union subgrid_cells
+
+let initial_grid_constraints grid =
+  let open GridConstraints in
+  let related_cell_values ~row ~col =
+    related_cells ~row ~col |> Cell_set.to_seq
+    |> Seq.flat_map (fun (row, col) ->
+           grid |> Grid.get ~row ~col |> Option.to_seq)
+    |> Digits.of_seq
+  in
+
+  let cell_constraint ~row ~col =
+    Digits.diff
+      Base.Sequence.(range 1 10 |> to_seq |> Digits.of_seq)
+      (related_cell_values ~row ~col)
+  in
+
+  unknown_cells grid
+  |> Base.Sequence.fold ~init:empty ~f:(fun grid (row, col) ->
+         let digits = cell_constraint ~row ~col in
+         grid |> set ~row ~col ~digits)
+
+let fix_cell_digit ~row ~col ~digit grid_constraints =
+  related_cells ~row ~col |> Cell_set.to_seq
+  |> Seq.fold_left
+       (fun grid (row, col) ->
+         grid |> GridConstraints.remove_digit ~row ~col ~digit)
+       grid_constraints
+  |> GridConstraints.remove ~row ~col
