@@ -1,4 +1,5 @@
 open Sudoku.Utils
+open Sudoku.Solver
 
 let grid = "
 . . 6 . . . 4 . 7 
@@ -12,4 +13,6 @@ let grid = "
 3 . 2 . . . 9 . .
 "
 
-let () = grid |> grid_of_string |> grid_to_string |> print_endline
+let () =
+  grid |> grid_of_string |> solve |> Base.Sequence.hd_exn |> grid_to_string
+  |> print_endline
