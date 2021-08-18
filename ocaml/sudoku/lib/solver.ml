@@ -85,5 +85,19 @@ let most_constraint_cell grid_constraints =
   in
 
   reduce constrained_cells ~f:(fun (cell1, digits1) (cell2, digits2) ->
-      if Digits.cardinal digits2 > Digits.cardinal digits2 then (cell1, digits1)
+      if Digits.cardinal digits1 < Digits.cardinal digits2 then (cell1, digits1)
       else (cell2, digits2))
+
+let solve grid =
+  let rec find_solutions grid constraints =
+    let open Base.Sequence in
+    match most_constraint_cell constraints with
+    | None -> singleton grid
+    | Some ((row, col), digits) ->
+        let* digit = Grid_constraints.Digits.to_seq digits |> of_seq in
+        let constraints' = fix_cell_digit ~row ~col ~digit constraints in
+        let grid' = Grid.set ~row ~col ~digit grid in
+        find_solutions grid' constraints'
+  in
+
+  find_solutions grid (initial_grid_constraints grid)
