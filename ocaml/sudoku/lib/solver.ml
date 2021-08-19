@@ -100,4 +100,4 @@ let solve grid =
         find_solutions grid' constraints'
   in
 
-  find_solutions grid (initial_grid_constraints grid)
+  find_solutions grid @@ initial_grid_constraints grid
