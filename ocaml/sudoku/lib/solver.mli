@@ -1,4 +1,4 @@
 open Data
 open Base
 
-val solve : Grid.t -> Grid.t Sequence.t
+val solve : int Grid.t -> int Grid.t Sequence.t

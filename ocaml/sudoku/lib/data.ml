@@ -7,30 +7,14 @@ end
 module Grid = struct
   module Map = Map.Make (Cell)
 
-  type t = int Map.t
+  type 'a t = 'a Map.t
 
   let get ~row ~col = Map.find_opt (row, col)
 
   let empty = Map.empty
 
-  let set ~row ~col ~digit = Map.add (row, col) digit
-end
-
-module Grid_constraints = struct
-  module Digits = Set.Make (Int)
-  module Map = Map.Make (Cell)
-
-  type t = Digits.t Map.t
-
-  let empty = Map.empty
-
-  let get ~row ~col = Map.find_opt (row, col)
-
-  let set ~row ~col ~digits = Map.add (row, col) digits
+  let set ~row ~col ~value = Map.add (row, col) value
 
   let remove ~row ~col = Map.remove (row, col)
-
-  let remove_digit ~row ~col ~digit =
-    Map.update (row, col) (fun digits ->
-        Option.map (Digits.remove digit) digits)
 end
+

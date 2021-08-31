@@ -59,4 +59,4 @@ let grid_of_string s =
   in
 
   Base.List.fold_left cells_with_digits ~init:Grid.empty
-    ~f:(fun grid ((row, col), digit) -> grid |> Grid.set ~row ~col ~digit)
+    ~f:(fun grid ((row, col), value) -> grid |> Grid.set ~row ~col ~value)
