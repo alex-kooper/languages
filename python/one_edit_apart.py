@@ -1,4 +1,4 @@
-# Facebook Sample Interview Quiestion "Edit Distance"
+# Facebook Sample Interview Question "Edit Distance"
 #
 # Write a function that returns whether two words are exactly "one edit" away
 # using the following signature:
