@@ -32,7 +32,7 @@ object BalancedSmileys extends App {
   def isBalanced(s: String): Boolean = {
 
     @tailrec
-    def go(minOpen: Int, maxOpen: Int, s: Stream[Char]): Boolean = s match {
+    def go(minOpen: Int, maxOpen: Int, s: LazyList[Char]): Boolean = s match {
       case ':' #:: '(' #:: rest => go(minOpen, maxOpen + 1, rest)
       case ':' #:: ')' #:: rest => go(minOpen - 1, maxOpen, rest)
       case '(' #:: rest => go(minOpen + 1, maxOpen + 1, rest)
@@ -45,7 +45,7 @@ object BalancedSmileys extends App {
       case _ => (minOpen to maxOpen).contains(0)
     }
 
-    go(0, 0, s.toStream)
+    go(0, 0, LazyList.from(s))
   }
 
   /**
@@ -68,7 +68,7 @@ object BalancedSmileys extends App {
       case (state, _) => Some(state)
     }
 
-    s.toStream
+    LazyList.from(s)
       .foldM(State(afterColon = false, 0, 0))(processChar)
       .exists(state => (state.minOpen to state.maxOpen).contains(0))
   }
