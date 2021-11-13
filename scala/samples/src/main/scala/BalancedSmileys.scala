@@ -42,7 +42,7 @@ object BalancedSmileys extends App {
         else
           go(minOpen - 1, maxOpen - 1, rest)
       case _ #:: rest => go(minOpen, maxOpen, rest)
-      case Stream() => (minOpen to maxOpen).contains(0)
+      case _ => (minOpen to maxOpen).contains(0)
     }
 
     go(0, 0, s.toStream)
