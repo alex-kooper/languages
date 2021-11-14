@@ -21,6 +21,6 @@ def parseIntoMap(s: String) =
   .mapValues(_.map(_._2).sum)
   .toMap
 
-@main def main() =
+@main def dataMinrPairCoding() =
   val exampleString = "Aa1133Iab2Aa112Iac3"
   println(s"${parseIntoMap(exampleString)}")
