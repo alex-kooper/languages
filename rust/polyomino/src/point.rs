@@ -9,7 +9,7 @@ pub struct Point {
 }
 
 impl Point {
-    const ORIGIN: Point = Point::new(0, 0);
+    pub const ORIGIN: Point = Point::new(0, 0);
 
     pub const fn new(x: Coordinate, y: Coordinate) -> Self {
         Point { x, y }

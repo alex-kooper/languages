@@ -142,4 +142,20 @@ mod tests {
                 .dimensions()
         )
     }
+
+    #[test]
+    pub fn test_shift() {
+        assert_eq!(
+            make_polyomino().dimensions(),
+            make_polyomino().shift(3, 7).dimensions()
+        );
+
+        assert_eq!(
+            make_polyomino()
+                .shift(33, 37)
+                .shift_to_origin()
+                .upper_left_corner(),
+            Point::ORIGIN
+        )
+    }
 }
