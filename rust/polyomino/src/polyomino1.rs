@@ -13,8 +13,8 @@ pub struct Dimensions {
 }
 
 impl Polyomino {
-    pub fn from<const N: usize>(arr: [Point; N]) -> Self {
-        Polyomino(BTreeSet::from(arr))
+    pub fn from<const N: usize>(arr: [(Coordinate, Coordinate); N]) -> Self {
+        Polyomino(BTreeSet::from(arr.map(|(x, y)| Point::new(x, y))))
     }
 
     pub fn contains(self: &Self, p: Point) -> bool {
@@ -78,5 +78,49 @@ impl Polyomino {
 
     fn map<F: Fn(&Point) -> Point>(self: &Self, f: F) -> Self {
         Polyomino(self.0.iter().map(f).collect())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const POINT_OF_ROTATION: Point = Point::new(3, 7);
+
+    pub fn make_polyomino() -> Polyomino {
+        Polyomino::from([(0, 0), (1, 0), (2, 0), (2, 1)])
+    }
+
+    #[test]
+    pub fn test_rotate_180_oposite_directions() {
+        assert_eq!(
+            make_polyomino()
+                .rotate_right(POINT_OF_ROTATION)
+                .rotate_right(POINT_OF_ROTATION),
+            make_polyomino()
+                .rotate_left(POINT_OF_ROTATION)
+                .rotate_left(POINT_OF_ROTATION)
+        );
+    }
+
+    #[test]
+    pub fn test_rotate_360() {
+        assert_eq!(
+            make_polyomino()
+                .rotate_right(POINT_OF_ROTATION)
+                .rotate_right(POINT_OF_ROTATION)
+                .rotate_right(POINT_OF_ROTATION)
+                .rotate_right(POINT_OF_ROTATION),
+            make_polyomino()
+        );
+
+        assert_eq!(
+            make_polyomino()
+                .rotate_left(POINT_OF_ROTATION)
+                .rotate_left(POINT_OF_ROTATION)
+                .rotate_left(POINT_OF_ROTATION)
+                .rotate_left(POINT_OF_ROTATION),
+            make_polyomino()
+        )
     }
 }
