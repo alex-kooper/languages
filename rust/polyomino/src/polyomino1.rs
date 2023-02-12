@@ -6,7 +6,7 @@ use std::collections::BTreeSet;
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Polyomino(BTreeSet<Point>);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Dimensions {
     pub width: Coordinate,
     pub height: Coordinate,
@@ -67,7 +67,7 @@ impl Polyomino {
 
         Dimensions {
             width: lrc.x - ulc.x + 1,
-            height: ulc.y - lrc.y + 1,
+            height: lrc.y - ulc.y + 1,
         }
     }
 
@@ -121,6 +121,25 @@ mod tests {
                 .rotate_left(POINT_OF_ROTATION)
                 .rotate_left(POINT_OF_ROTATION),
             make_polyomino()
+        )
+    }
+
+    #[test]
+    pub fn test_dimensions() {
+        assert_eq!(
+            make_polyomino().dimensions(),
+            Dimensions {
+                width: 3,
+                height: 2
+            }
+        );
+
+        assert_eq!(
+            make_polyomino().dimensions(),
+            make_polyomino()
+                .rotate_right(POINT_OF_ROTATION)
+                .rotate_right(POINT_OF_ROTATION)
+                .dimensions()
         )
     }
 }
