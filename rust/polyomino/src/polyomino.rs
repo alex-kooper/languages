@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 
-use crate::point::*;
 use im::OrdSet;
 use std::fmt;
+use std::iter::successors;
+
+use crate::point::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Polyomino(OrdSet<Point>);
@@ -88,6 +90,30 @@ impl Polyomino {
     pub fn shift_to_origin(&self) -> Self {
         let point = self.upper_left_corner();
         self.shift(-point.x, -point.y)
+    }
+
+    pub fn all_rotations(&self) -> impl Iterator<Item = Polyomino> {
+        successors(Some(self.shift_to_origin()), |p| {
+            Some(p.rotate_right().shift_to_origin())
+        })
+        .take(4)
+    }
+
+    pub fn all_congruents(&self) -> OrdSet<Polyomino> {
+        self.all_rotations()
+            .chain(self.reflect_over_the_x_axis().all_rotations())
+            .collect()
+    }
+
+    pub fn to_canonical_form(&self) -> Polyomino {
+        self.all_congruents()
+            .into_iter()
+            .filter(|p| {
+                let d = p.dimensions();
+                d.width >= d.height
+            })
+            .max()
+            .unwrap()
     }
 
     fn map<F: Fn(&Point) -> Point>(&self, f: F) -> Self {
@@ -209,5 +235,13 @@ mod tests {
             make_polyomino().add_point(Point::new(2, 2)),
             Polyomino::from([(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)])
         );
+    }
+
+    #[test]
+    pub fn test_canonical_form() {
+        assert_eq!(
+            make_polyomino().rotate_left().shift(12, 17).to_canonical_form(),
+            make_polyomino().rotate_right().shift(1, 2).to_canonical_form()
+        )
     }
 }
