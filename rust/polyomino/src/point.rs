@@ -15,32 +15,32 @@ impl Point {
         Point { x, y }
     }
 
-    pub fn shift(self: Self, dx: Coordinate, dy: Coordinate) -> Self {
+    pub fn shift(self, dx: Coordinate, dy: Coordinate) -> Self {
         Self::new(self.x + dx, self.y + dy)
     }
 
-    pub fn rotate_right(self: Self, p: Point) -> Self {
+    pub fn rotate_right(self, p: Point) -> Self {
         Point {
             x: -(self.y - p.y) + p.x,
             y: (self.x - p.x) + p.y,
         }
     }
 
-    pub fn rotate_left(self: Self, p: Point) -> Self {
+    pub fn rotate_left(self, p: Point) -> Self {
         Point {
             x: (self.y - p.y) + p.x,
             y: -(self.x - p.x) + p.y,
         }
     }
 
-    pub fn reflect_vertically(self: Self, x: Coordinate) -> Self {
+    pub fn reflect_vertically(self, x: Coordinate) -> Self {
         Point {
             x: 2 * x - self.x,
             y: self.y,
         }
     }
 
-    pub fn reflect_horizontally(self: Self, y: Coordinate) -> Self {
+    pub fn reflect_horizontally(self, y: Coordinate) -> Self {
         Point {
             x: self.x,
             y: 2 * y - self.y,
