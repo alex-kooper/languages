@@ -2,6 +2,7 @@
 
 use crate::point::*;
 use std::collections::BTreeSet;
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Polyomino(BTreeSet<Point>);
@@ -25,12 +26,20 @@ impl Polyomino {
         self.map(|p| p.shift(dx, dy))
     }
 
-    pub fn rotate_right(&self, rotation_point: Point) -> Self {
+    pub fn rotate_right_around(&self, rotation_point: Point) -> Self {
         self.map(|p| p.rotate_right(rotation_point))
     }
 
-    pub fn rotate_left(&self, rotation_point: Point) -> Self {
+    pub fn rotate_right(&self) -> Self {
+        self.rotate_right_around(Point::ORIGIN)
+    }
+
+    pub fn rotate_left_around(&self, rotation_point: Point) -> Self {
         self.map(|p| p.rotate_left(rotation_point))
+    }
+
+    pub fn rotate_left(&self) -> Self {
+        self.rotate_left_around(Point::ORIGIN)
     }
 
     pub fn reflect_vertically(&self, x: Coordinate) -> Self {
@@ -81,6 +90,28 @@ impl Polyomino {
     }
 }
 
+impl fmt::Display for Polyomino {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let polyomino = self.shift_to_origin();
+        let d = polyomino.dimensions();
+        f.write_str("\n")?;
+
+        for y in 0..d.height {
+            for x in 0..d.width {
+                if polyomino.contains(Point::new(x, y)) {
+                    f.write_str("[]")?
+                } else {
+                    f.write_str("  ")?
+                }
+            }
+
+            f.write_str("\n")?
+        }
+
+        fmt::Result::Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -95,11 +126,11 @@ mod tests {
     pub fn test_rotate_180_oposite_directions() {
         assert_eq!(
             make_polyomino()
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION),
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION),
             make_polyomino()
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
         );
     }
 
@@ -107,19 +138,19 @@ mod tests {
     pub fn test_rotate_360() {
         assert_eq!(
             make_polyomino()
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION),
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION),
             make_polyomino()
         );
 
         assert_eq!(
             make_polyomino()
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION),
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION),
             make_polyomino()
         )
     }
@@ -137,8 +168,8 @@ mod tests {
         assert_eq!(
             make_polyomino().dimensions(),
             make_polyomino()
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION)
                 .dimensions()
         )
     }
@@ -156,6 +187,18 @@ mod tests {
                 .shift_to_origin()
                 .upper_left_corner(),
             Point::ORIGIN
+        )
+    }
+
+    #[test]
+    pub fn test_display() {
+        assert_eq!(
+            format!("{}", make_polyomino().rotate_right()),
+            "
+  []
+  []
+[][]
+"
         )
     }
 }
