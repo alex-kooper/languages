@@ -15,7 +15,8 @@ pub struct Dimensions {
 
 impl Polyomino {
     pub fn from<const N: usize>(arr: [(Coordinate, Coordinate); N]) -> Self {
-        Polyomino(OrdSet::from(arr.map(|(x, y)| Point::new(x, y)).to_vec()))
+        let points = arr.map(|(x, y)| Point::new(x, y));
+        Polyomino(OrdSet::from(&points[..]))
     }
 
     pub fn add_point(&self, p: Point) -> Self {
