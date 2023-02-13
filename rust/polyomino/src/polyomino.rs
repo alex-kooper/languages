@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
 use crate::point::*;
-use std::collections::BTreeSet;
+use im::OrdSet;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
-pub struct Polyomino(BTreeSet<Point>);
+pub struct Polyomino(OrdSet<Point>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Dimensions {
@@ -15,14 +15,18 @@ pub struct Dimensions {
 
 impl Polyomino {
     pub fn from<const N: usize>(arr: [(Coordinate, Coordinate); N]) -> Self {
-        Polyomino(BTreeSet::from(arr.map(|(x, y)| Point::new(x, y))))
+        Polyomino(OrdSet::from(arr.map(|(x, y)| Point::new(x, y)).to_vec()))
+    }
+
+    pub fn add_point(&self, p: Point) -> Self {
+        Self(self.0.update(p))
     }
 
     pub fn contains(&self, p: Point) -> bool {
         self.0.contains(&p)
     }
 
-    pub fn shift(&self, dx: Coordinate, dy: Coordinate) -> Polyomino {
+    pub fn shift(&self, dx: Coordinate, dy: Coordinate) -> Self {
         self.map(|p| p.shift(dx, dy))
     }
 
@@ -80,7 +84,7 @@ impl Polyomino {
         }
     }
 
-    pub fn shift_to_origin(&self) -> Polyomino {
+    pub fn shift_to_origin(&self) -> Self {
         let point = self.upper_left_corner();
         self.shift(-point.x, -point.y)
     }
@@ -176,16 +180,12 @@ mod tests {
 
     #[test]
     pub fn test_shift() {
-        assert_eq!(
-            make_polyomino().dimensions(),
-            make_polyomino().shift(3, 7).dimensions()
-        );
+        let p = make_polyomino();
+
+        assert_eq!(p.dimensions(), p.shift(3, 7).dimensions());
 
         assert_eq!(
-            make_polyomino()
-                .shift(33, 37)
-                .shift_to_origin()
-                .upper_left_corner(),
+            p.shift(33, 37).shift_to_origin().upper_left_corner(),
             Point::ORIGIN
         )
     }
@@ -200,5 +200,13 @@ mod tests {
 [][]
 "
         )
+    }
+
+    #[test]
+    pub fn test_add_point() {
+        assert_eq!(
+            make_polyomino().add_point(Point::new(2, 2)),
+            Polyomino::from([(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)])
+        );
     }
 }
