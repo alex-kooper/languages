@@ -32,7 +32,7 @@ impl Polyomino {
     }
 
     pub fn rotate_right_around(&self, rotation_point: Point) -> Self {
-        self.map(|p| p.rotate_right(rotation_point))
+        self.map(|p| p.rotate_right_around(rotation_point))
     }
 
     pub fn rotate_right(&self) -> Self {
@@ -40,7 +40,7 @@ impl Polyomino {
     }
 
     pub fn rotate_left_around(&self, rotation_point: Point) -> Self {
-        self.map(|p| p.rotate_left(rotation_point))
+        self.map(|p| p.rotate_left_around(rotation_point))
     }
 
     pub fn rotate_left(&self) -> Self {

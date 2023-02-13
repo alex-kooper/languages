@@ -19,17 +19,17 @@ impl Point {
         Self::new(self.x + dx, self.y + dy)
     }
 
-    pub fn rotate_right(self, p: Point) -> Self {
+    pub fn rotate_right_around(self, rotation_point: Point) -> Self {
         Point {
-            x: -(self.y - p.y) + p.x,
-            y: (self.x - p.x) + p.y,
+            x: -(self.y - rotation_point.y) + rotation_point.x,
+            y: (self.x - rotation_point.x) + rotation_point.y,
         }
     }
 
-    pub fn rotate_left(self, p: Point) -> Self {
+    pub fn rotate_left_around(self, rotation_point: Point) -> Self {
         Point {
-            x: (self.y - p.y) + p.x,
-            y: -(self.x - p.x) + p.y,
+            x: (self.y - rotation_point.y) + rotation_point.x,
+            y: -(self.x - rotation_point.x) + rotation_point.y,
         }
     }
 
@@ -57,23 +57,23 @@ mod tests {
 
     #[test]
     pub fn test_one_rotation() {
-        assert_ne!(POINT.rotate_right(POINT_OF_ROTATION), POINT);
-        assert_ne!(POINT.rotate_left(POINT_OF_ROTATION), POINT);
+        assert_ne!(POINT.rotate_right_around(POINT_OF_ROTATION), POINT);
+        assert_ne!(POINT.rotate_left_around(POINT_OF_ROTATION), POINT);
     }
 
     #[test]
     pub fn test_rotate_90_oposite_directions() {
         assert_eq!(
             POINT
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION),
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION),
             POINT
         );
 
         assert_eq!(
             POINT
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION),
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION),
             POINT
         )
     }
@@ -82,11 +82,11 @@ mod tests {
     pub fn test_rotate_180_oposite_directions() {
         assert_eq!(
             POINT
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION),
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION),
             POINT
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
         );
     }
 
@@ -94,19 +94,19 @@ mod tests {
     pub fn test_rotate_360() {
         assert_eq!(
             POINT
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION)
-                .rotate_right(POINT_OF_ROTATION),
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION)
+                .rotate_right_around(POINT_OF_ROTATION),
             POINT
         );
 
         assert_eq!(
             POINT
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION)
-                .rotate_left(POINT_OF_ROTATION),
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION)
+                .rotate_left_around(POINT_OF_ROTATION),
             POINT
         )
     }
