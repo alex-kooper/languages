@@ -3,7 +3,9 @@ mod point;
 mod polyomino;
 
 fn main() {
-    for p in generator::generate(10) {
+    println!("Below is the list of all possible pentaminos");
+    
+    for p in generator::generate(5) {
         print!("{p}")
     }
 }
