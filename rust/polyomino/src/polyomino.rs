@@ -7,7 +7,7 @@ use std::iter::successors;
 use crate::point::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
-pub struct Polyomino(OrdSet<Point>);
+pub struct Polyomino(pub OrdSet<Point>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Dimensions {
@@ -19,6 +19,10 @@ impl Polyomino {
     pub fn from<const N: usize>(arr: [(Coordinate, Coordinate); N]) -> Self {
         let points = arr.map(|(x, y)| Point::new(x, y));
         Polyomino(OrdSet::from(&points[..]))
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Point> {
+        self.0.iter()
     }
 
     pub fn add_point(&self, p: Point) -> Self {
@@ -240,8 +244,14 @@ mod tests {
     #[test]
     pub fn test_canonical_form() {
         assert_eq!(
-            make_polyomino().rotate_left().shift(12, 17).to_canonical_form(),
-            make_polyomino().rotate_right().shift(1, 2).to_canonical_form()
+            make_polyomino()
+                .rotate_left()
+                .shift(12, 17)
+                .to_canonical_form(),
+            make_polyomino()
+                .rotate_right()
+                .shift(1, 2)
+                .to_canonical_form()
         )
     }
 }

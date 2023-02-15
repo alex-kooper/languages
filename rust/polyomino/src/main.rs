@@ -1,5 +1,7 @@
 mod point;
 mod polyomino;
+mod generator;
+
 // use point::Point;
 // use polyomino::Polyomino;
 
