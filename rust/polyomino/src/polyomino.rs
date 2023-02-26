@@ -1,13 +1,15 @@
 #![allow(dead_code)]
 
-use im::OrdSet;
+use std::collections::BTreeSet;
 use std::fmt;
 use std::iter::successors;
 
 use crate::point::*;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
-pub struct Polyomino(pub OrdSet<Point>);
+type Set<T> = BTreeSet<T>;
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+pub struct Polyomino(pub Set<Point>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Dimensions {
@@ -18,7 +20,7 @@ pub struct Dimensions {
 impl Polyomino {
     pub fn from<const N: usize>(arr: [(Coordinate, Coordinate); N]) -> Self {
         let points = arr.map(|(x, y)| Point::new(x, y));
-        Polyomino(OrdSet::from(&points[..]))
+        Polyomino(Set::from(points))
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Point> {
@@ -26,7 +28,9 @@ impl Polyomino {
     }
 
     pub fn add_point(&self, p: Point) -> Self {
-        Self(self.0.update(p))
+        let mut new_set = self.0.clone();
+        new_set.insert(p);
+        Self(new_set)
     }
 
     pub fn contains(&self, p: Point) -> bool {
@@ -103,7 +107,7 @@ impl Polyomino {
         .take(4)
     }
 
-    pub fn all_congruents(&self) -> OrdSet<Polyomino> {
+    pub fn all_congruents(&self) -> Set<Polyomino> {
         self.all_rotations()
             .chain(self.reflect_over_the_x_axis().all_rotations())
             .collect()

@@ -39,7 +39,7 @@ fn main() {
     );
 
     if let Some(n) = answer {
-        for p in polyominos.take(n) {
+        for p in polyominos.iter().take(n) {
             print!("{p}")
         }
     } else {

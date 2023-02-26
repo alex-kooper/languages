@@ -1,19 +1,21 @@
 #![allow(dead_code)]
 
-use im::OrdSet;
+use std::collections::HashSet;
 use std::iter::successors;
 
 use crate::{point::Coordinate, polyomino::*};
 
-pub fn generate(n: usize) -> OrdSet<Polyomino> {
+type Set<T> = HashSet<T>;
+
+pub fn generate(n: usize) -> Set<Polyomino> {
     let monomino: Polyomino = Polyomino::from([(0, 0)]);
     let domino: Polyomino = Polyomino::from([(0, 0), (1, 0)]);
 
     match n {
-        0 => OrdSet::new(),
-        1 => OrdSet::unit(monomino),
-        2 => OrdSet::unit(domino),
-        n => successors(Some(OrdSet::unit(domino)), |polyominos| {
+        0 => Set::new(),
+        1 => Set::from([monomino]),
+        2 => Set::from([domino]),
+        n => successors(Some(Set::from([domino])), |polyominos| {
             Some(
                 polyominos
                     .iter()
@@ -49,12 +51,11 @@ fn generate_by_adding_one_point_to(polyomino: &Polyomino) -> impl Iterator<Item 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use im::OrdSet;
 
     #[test]
     pub fn test_generated_by_adding_one_point() {
         let polyomino = Polyomino::from([(0, 0), (1, 0)]).to_canonical_form();
-        let polyominos: OrdSet<Polyomino> = generate_by_adding_one_point_to(&polyomino).collect();
+        let polyominos: Set<Polyomino> = generate_by_adding_one_point_to(&polyomino).collect();
 
         assert_eq!(polyominos.len(), 2)
     }

@@ -2,7 +2,7 @@
 
 pub type Coordinate = i16;
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct Point {
     pub x: Coordinate,
     pub y: Coordinate,
