@@ -2,6 +2,7 @@
 
 use std::collections::HashSet;
 use std::iter::successors;
+use rayon::prelude::*;
 
 use crate::{point::Coordinate, polyomino::*};
 
@@ -18,7 +19,7 @@ pub fn generate(n: usize) -> Set<Polyomino> {
         n => successors(Some(Set::from([domino])), |polyominos| {
             Some(
                 polyominos
-                    .iter()
+                    .par_iter()
                     .flat_map(|p| generate_by_adding_one_point_to(p))
                     .collect(),
             )
@@ -29,14 +30,15 @@ pub fn generate(n: usize) -> Set<Polyomino> {
     }
 }
 
-fn generate_by_adding_one_point_to(polyomino: &Polyomino) -> impl Iterator<Item = Polyomino> + '_ {
+fn generate_by_adding_one_point_to(polyomino: &Polyomino) -> Set<Polyomino> {
     const ADJACENT_POINT_DELTAS: [(Coordinate, Coordinate); 4] = [(-1, 0), (0, -1), (1, 0), (0, 1)];
 
     polyomino
         .iter()
+        .par_bridge()
         .map(|point| {
-            ADJACENT_POINT_DELTAS.into_iter().flat_map(|(dx, dy)| {
-                let new_point = point.shift(dx, dy);
+            ADJACENT_POINT_DELTAS.par_iter().flat_map(|(dx, dy)| {
+                let new_point = point.shift(*dx, *dy);
 
                 if polyomino.contains(new_point) {
                     None
@@ -46,6 +48,7 @@ fn generate_by_adding_one_point_to(polyomino: &Polyomino) -> impl Iterator<Item 
             })
         })
         .flatten()
+        .collect()
 }
 
 #[cfg(test)]
@@ -55,7 +58,7 @@ mod tests {
     #[test]
     pub fn test_generated_by_adding_one_point() {
         let polyomino = Polyomino::from([(0, 0), (1, 0)]).to_canonical_form();
-        let polyominos: Set<Polyomino> = generate_by_adding_one_point_to(&polyomino).collect();
+        let polyominos: Set<Polyomino> = generate_by_adding_one_point_to(&polyomino);
 
         assert_eq!(polyominos.len(), 2)
     }
