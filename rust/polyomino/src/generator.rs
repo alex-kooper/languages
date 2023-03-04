@@ -24,8 +24,7 @@ pub fn generate(n: usize) -> Set<Polyomino> {
                     .collect(),
             )
         })
-        .take(n - 1)
-        .last()
+        .nth(n - 2)
         .unwrap(),
     }
 }
